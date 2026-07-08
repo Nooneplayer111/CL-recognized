@@ -1,4 +1,4 @@
-package com.elephantjava.dto;
+package com.elephantjava.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,8 +9,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("camera")
-public class Camera {
+@TableName("species")
+public class Species {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -18,26 +18,14 @@ public class Camera {
     @TableField("name")
     private String name;
 
-    @TableField("ip_address")
-    private String ipAddress;
+    @TableField("code")
+    private String code;
 
-    @TableField("location")
-    private String location;
+    @TableField("description")
+    private String description;
 
-    @TableField("port")
-    private Integer port;
-
-    @TableField("username")
-    private String username;
-
-    @TableField("password")
-    private String password;
-
-    @TableField("status")
-    private String status;
-
-    @TableField("preview_url")
-    private String previewUrl;
+    @TableField("image_url")
+    private String imageUrl;
 
     @TableField("create_time")
     private LocalDateTime createTime;

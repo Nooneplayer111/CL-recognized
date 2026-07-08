@@ -1,4 +1,4 @@
-package com.elephantjava.dto;
+package com.elephantjava.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -9,8 +9,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("species")
-public class Species {
+@TableName("individual")
+public class Individual {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -21,11 +21,23 @@ public class Species {
     @TableField("code")
     private String code;
 
+    @TableField("species_id")
+    private Long speciesId;
+
+    @TableField("species_name")
+    private String speciesName;
+
+    @TableField("gender")
+    private String gender;
+
+    @TableField("age")
+    private Integer age;
+
     @TableField("description")
     private String description;
 
-    @TableField("image_url")
-    private String imageUrl;
+    @TableField("status")
+    private String status;
 
     @TableField("create_time")
     private LocalDateTime createTime;
