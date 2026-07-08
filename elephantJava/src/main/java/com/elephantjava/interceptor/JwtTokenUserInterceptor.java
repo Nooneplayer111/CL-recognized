@@ -58,7 +58,8 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        String secretKey = jwtProperties.getUserSecretKey();
+        // 使用与登录签发相同的密钥进行校验
+        String secretKey = jwtProperties.getAdminSecretKey();
         if (secretKey == null || secretKey.isEmpty()) {
             log.error("jwt secret key is null or empty");
             response.setStatus(401);

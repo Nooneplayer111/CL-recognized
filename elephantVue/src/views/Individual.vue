@@ -145,6 +145,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
+import request from '../utils/request'
 import axios from 'axios'
 
 const showAddDialog = ref(false)
@@ -208,14 +209,11 @@ const tableData = computed(() => {
 
 const loadSpecies = async () => {
   try {
-    const response = await axios.get('/api/species')
-    speciesList.value = response.data
+    const data = await request.get('/species')
+    speciesList.value = Array.isArray(data) ? data : (data?.data || [])
   } catch (error) {
-    speciesList.value = [
-      { id: 1, name: '亚洲象' },
-      { id: 2, name: '非洲象' },
-      { id: 3, name: '金丝猴' }
-    ]
+    speciesList.value = []
+    ElMessage.error(error.message || '获取物种列表失败')
   }
 }
 
