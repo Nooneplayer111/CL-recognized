@@ -5,6 +5,9 @@ spring:
     username: root
     password: 1234
 
+server:
+  port: 8082
+
 # MyBatis-Plus ??
 mybatis-plus:
   configuration:
@@ -13,4 +16,18 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto  # ??????
+
+
+sky:
+  jwt:
+    # HS256 要求密钥长度 >= 256 bits（至少 32 个字符）
+    admin-secret-key: itheimaElephantJavaAdminJwtSecretKey2026
+    # 设置jwt过期时间
+    admin-ttl: 7200000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    # 用户端配置
+    user-secret-key: itheimaElephantJavaUserJwtSecretKey2026
+    user-ttl: 7200000
+    user-token-name: token
 

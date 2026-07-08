@@ -26,6 +26,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import router from '../router'
+import request from '../utils/request'
 
 const formRef = ref(null)
 const loading = ref(false)
@@ -47,13 +48,21 @@ const handleLogin = async () => {
   await formRef.value.validate()
   loading.value = true
   
-  setTimeout(() => {
-    localStorage.setItem('token', 'mock-token')
-    localStorage.setItem('username', form.username)
+  try {
+    const response = await request.post('/user/login', {
+      username: form.username,
+      password: form.password
+    })
+    
+    localStorage.setItem('token', response.data.token)
+    localStorage.setItem('username', response.data.userName)
     ElMessage.success('登录成功')
-    loading.value = false
     router.push('/')
-  }, 1000)
+  } catch (error) {
+    ElMessage.error(error.message || '登录失败')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
