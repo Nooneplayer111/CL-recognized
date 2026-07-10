@@ -2,13 +2,14 @@
   <div class="camera-container">
     <div class="page-header">
       <h2>摄像头管理</h2>
-      <el-button type="primary" @click="showAddDialog = true">
+      <el-button type="primary" @click="openAddDialog">
         <el-icon><Plus /></el-icon>
         添加摄像头
       </el-button>
     </div>
-    
-    <div class="camera-grid">
+
+    <div v-loading="loading" class="camera-grid">
+      <el-empty v-if="!loading && cameraList.length === 0" description="暂无摄像头数据" />
       <div v-for="camera in cameraList" :key="camera.id" class="camera-card">
         <div class="camera-header">
           <div class="camera-status" :class="camera.status">
@@ -34,8 +35,8 @@
         </div>
       </div>
     </div>
-    
-    <el-dialog :title="dialogTitle" v-model="showAddDialog" width="500px">
+
+    <el-dialog :title="dialogTitle" v-model="showAddDialog" width="500px" @closed="resetForm">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="摄像头名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入摄像头名称" />
@@ -53,12 +54,12 @@
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" />
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showAddDialog = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">确定</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -68,11 +69,13 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, VideoCamera, MapLocation, Monitor } from '@element-plus/icons-vue'
-import axios from 'axios'
+import request from '../utils/request'
 
 const showAddDialog = ref(false)
 const dialogTitle = ref('添加摄像头')
 const formRef = ref(null)
+const loading = ref(false)
+const submitting = ref(false)
 
 const form = reactive({
   id: null,
@@ -92,50 +95,32 @@ const rules = {
 
 const cameraList = ref([])
 
+const buildPayload = () => ({
+  name: form.name,
+  ipAddress: form.ipAddress,
+  location: form.location,
+  port: form.port,
+  username: form.username,
+  password: form.password
+})
+
 const loadCameras = async () => {
+  loading.value = true
   try {
-    const response = await axios.get('/api/cameras')
-    cameraList.value = response.data
+    const data = await request.get('/cameras')
+    cameraList.value = Array.isArray(data) ? data : (data?.data || [])
   } catch (error) {
-    cameraList.value = [
-      {
-        id: 1,
-        name: '监控点A-东门',
-        ipAddress: '192.168.1.101',
-        location: '园区东门入口',
-        port: 8080,
-        status: 'online',
-        previewUrl: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=security%20camera%20view%20of%20wildlife%20park%20entrance&image_size=landscape_16_9'
-      },
-      {
-        id: 2,
-        name: '监控点B-象舍',
-        ipAddress: '192.168.1.102',
-        location: '大象馆区域',
-        port: 8080,
-        status: 'online',
-        previewUrl: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=security%20camera%20view%20of%20elephant%20enclosure&image_size=landscape_16_9'
-      },
-      {
-        id: 3,
-        name: '监控点C-猴山',
-        ipAddress: '192.168.1.103',
-        location: '金丝猴展示区',
-        port: 8080,
-        status: 'offline',
-        previewUrl: ''
-      },
-      {
-        id: 4,
-        name: '监控点D-北门',
-        ipAddress: '192.168.1.104',
-        location: '园区北门出口',
-        port: 8080,
-        status: 'online',
-        previewUrl: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=security%20camera%20view%20of%20park%20gate&image_size=landscape_16_9'
-      }
-    ]
+    cameraList.value = []
+    ElMessage.error(error.message || '获取摄像头列表失败')
+  } finally {
+    loading.value = false
   }
+}
+
+const openAddDialog = () => {
+  dialogTitle.value = '添加摄像头'
+  resetForm()
+  showAddDialog.value = true
 }
 
 const editCamera = (camera) => {
@@ -150,44 +135,36 @@ const deleteCamera = async (id) => {
     cancelButtonText: '取消',
     type: 'warning'
   })
+
   try {
-    await axios.delete(`/api/cameras/${id}`)
+    await request.delete(`/cameras/${id}`)
     ElMessage.success('删除成功')
     loadCameras()
   } catch (error) {
-    cameraList.value = cameraList.value.filter(item => item.id !== id)
-    ElMessage.success('删除成功')
+    ElMessage.error(error.message || '删除失败')
   }
 }
 
 const submitForm = async () => {
   await formRef.value.validate()
+  submitting.value = true
+
   try {
+    const payload = buildPayload()
     if (form.id) {
-      await axios.put(`/api/cameras/${form.id}`, form)
+      await request.put(`/cameras/${form.id}`, payload)
       ElMessage.success('修改成功')
     } else {
-      await axios.post('/api/cameras', form)
+      await request.post('/cameras', payload)
       ElMessage.success('添加成功')
     }
     showAddDialog.value = false
     resetForm()
     loadCameras()
   } catch (error) {
-    if (form.id) {
-      const index = cameraList.value.findIndex(item => item.id === form.id)
-      if (index !== -1) {
-        cameraList.value[index] = { ...form, status: cameraList.value[index].status }
-      }
-      ElMessage.success('修改成功')
-    } else {
-      form.id = Date.now()
-      form.status = 'offline'
-      cameraList.value.push({ ...form })
-      ElMessage.success('添加成功')
-    }
-    showAddDialog.value = false
-    resetForm()
+    ElMessage.error(error.message || '保存失败')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -199,6 +176,7 @@ const resetForm = () => {
   form.port = 8080
   form.username = ''
   form.password = ''
+  formRef.value?.clearValidate()
 }
 
 onMounted(() => {
@@ -228,6 +206,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
+  min-height: 200px;
 }
 
 .camera-card {

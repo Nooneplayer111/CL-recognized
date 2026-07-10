@@ -7,10 +7,10 @@
         </div>
         <div class="user-info">
           <h2>{{ userInfo.username }}</h2>
-          <p>系统管理员</p>
+          <p>{{ userInfo.realName || '系统管理员' }}</p>
         </div>
       </div>
-      
+
       <div class="profile-content">
         <el-tabs v-model="activeTab">
           <el-tab-pane label="基本信息" name="basic">
@@ -31,18 +31,24 @@
                 <el-input v-model="userInfo.department" />
               </el-form-item>
               <el-form-item label="入职时间">
-                <el-date-picker v-model="userInfo.joinDate" type="date" placeholder="选择日期" />
+                <el-date-picker
+                  v-model="userInfo.joinDate"
+                  type="date"
+                  placeholder="选择日期"
+                  value-format="YYYY-MM-DD"
+                  style="width: 100%"
+                />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="saveBasicInfo">保存修改</el-button>
+                <el-button type="primary" :loading="saving" @click="saveBasicInfo">保存修改</el-button>
               </el-form-item>
             </el-form>
           </el-tab-pane>
-          
+
           <el-tab-pane label="修改密码" name="password">
             <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="120px" class="profile-form">
               <el-form-item label="旧密码" prop="oldPassword">
-                <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入旧密码" />
+                <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入旧密码" show-password />
               </el-form-item>
               <el-form-item label="新密码" prop="newPassword">
                 <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码" show-password />
@@ -51,11 +57,11 @@
                 <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" show-password />
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="changePassword">修改密码</el-button>
+                <el-button type="primary" :loading="changingPassword" @click="changePassword">修改密码</el-button>
               </el-form-item>
             </el-form>
           </el-tab-pane>
-          
+
           <el-tab-pane label="系统设置" name="settings">
             <div class="settings-list">
               <div class="setting-item">
@@ -95,20 +101,24 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User } from '@element-plus/icons-vue'
-import axios from 'axios'
+import request from '../utils/request'
 
+const router = useRouter()
 const activeTab = ref('basic')
 const passwordFormRef = ref(null)
+const saving = ref(false)
+const changingPassword = ref(false)
 
 const userInfo = reactive({
   username: localStorage.getItem('username') || 'admin',
-  realName: '管理员',
-  email: 'admin@example.com',
-  phone: '13800138000',
-  department: '技术部',
-  joinDate: '2024-01-01'
+  realName: '',
+  email: '',
+  phone: '',
+  department: '',
+  joinDate: ''
 })
 
 const passwordForm = reactive({
@@ -148,32 +158,50 @@ const settings = reactive({
 
 const loadUserInfo = async () => {
   try {
-    const response = await axios.get('/api/user/info')
-    Object.assign(userInfo, response.data)
+    const data = await request.get('/user/info')
+    Object.assign(userInfo, data)
   } catch (error) {
+    ElMessage.error(error.message || '获取用户信息失败')
   }
 }
 
 const saveBasicInfo = async () => {
+  saving.value = true
   try {
-    await axios.put('/api/user/info', userInfo)
+    await request.put('/user/info', {
+      username: userInfo.username,
+      realName: userInfo.realName,
+      email: userInfo.email,
+      phone: userInfo.phone,
+      department: userInfo.department,
+      joinDate: userInfo.joinDate
+    })
     ElMessage.success('基本信息保存成功')
   } catch (error) {
-    ElMessage.success('基本信息保存成功')
+    ElMessage.error(error.message || '保存失败')
+  } finally {
+    saving.value = false
   }
 }
 
 const changePassword = async () => {
   await passwordFormRef.value.validate()
+  changingPassword.value = true
+
   try {
-    await axios.post('/api/user/changePassword', passwordForm)
+    await request.post('/user/changePassword', passwordForm)
     ElMessage.success('密码修改成功，请重新登录')
+    localStorage.removeItem('token')
+    localStorage.removeItem('username')
+    router.push('/login')
   } catch (error) {
-    ElMessage.success('密码修改成功，请重新登录')
+    ElMessage.error(error.message || '密码修改失败')
+  } finally {
+    changingPassword.value = false
+    passwordForm.oldPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
   }
-  passwordForm.oldPassword = ''
-  passwordForm.newPassword = ''
-  passwordForm.confirmPassword = ''
 }
 
 const saveSettings = () => {

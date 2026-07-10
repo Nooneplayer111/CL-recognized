@@ -28,6 +28,11 @@ const routes = [
         component: () => import('../views/Camera.vue')
       },
       {
+        path: 'recognition',
+        name: 'RecognitionRecord',
+        component: () => import('../views/RecognitionRecord.vue')
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('../views/Profile.vue')

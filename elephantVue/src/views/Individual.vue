@@ -3,26 +3,26 @@
     <div class="page-header">
       <h2>个体管理</h2>
       <div class="header-actions">
-        <el-select v-model="searchForm.speciesId" placeholder="选择物种" class="species-select" @change="handleSearch">
+        <el-select v-model="searchForm.speciesId" placeholder="选择物种" class="species-select" clearable @change="handleSearch">
           <el-option label="全部物种" value="" />
           <el-option v-for="species in speciesList" :key="species.id" :label="species.name" :value="species.id" />
         </el-select>
-        <el-button type="primary" @click="showAddDialog = true">
+        <el-button type="primary" @click="openAddDialog">
           <el-icon><Plus /></el-icon>
           添加个体
         </el-button>
       </div>
     </div>
-    
+
     <div class="search-bar">
-      <el-input v-model="searchForm.keyword" placeholder="搜索个体名称或编号" clearable @keyup.enter="handleSearch">
+      <el-input v-model="searchForm.keyword" placeholder="搜索个体名称或编号" clearable @keyup.enter="handleSearch" @clear="handleSearch">
         <template #append>
           <el-button @click="handleSearch"><el-icon><Search /></el-icon></el-button>
         </template>
       </el-input>
     </div>
-    
-    <el-table :data="tableData" border class="individual-table" @row-click="handleRowClick">
+
+    <el-table v-loading="loading" :data="tableData" border class="individual-table" @row-click="handleRowClick">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="个体名称" />
       <el-table-column prop="code" label="个体编号" />
@@ -50,7 +50,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <div class="pagination">
       <el-pagination
         v-model:current-page="pagination.currentPage"
@@ -62,14 +62,14 @@
         @current-change="handleCurrentChange"
       />
     </div>
-    
-    <el-dialog :title="dialogTitle" v-model="showAddDialog" width="600px">
+
+    <el-dialog :title="dialogTitle" v-model="showAddDialog" width="600px" @closed="resetForm">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="个体名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入个体名称" />
         </el-form-item>
         <el-form-item label="个体编号" prop="code">
-          <el-input v-model="form.code" placeholder="请输入个体编号" />
+          <el-input v-model="form.code" placeholder="请输入个体编号" :disabled="!!form.id" />
         </el-form-item>
         <el-form-item label="所属物种" prop="speciesId">
           <el-select v-model="form.speciesId" placeholder="请选择物种">
@@ -94,10 +94,10 @@
       </el-form>
       <template #footer>
         <el-button @click="showAddDialog = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">确定</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitForm">确定</el-button>
       </template>
     </el-dialog>
-    
+
     <el-dialog title="个体详情" v-model="showDetailDialog" width="600px">
       <div v-if="detailData" class="detail-content">
         <div class="detail-row">
@@ -142,19 +142,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import request from '../utils/request'
-import axios from 'axios'
 
 const showAddDialog = ref(false)
 const showDetailDialog = ref(false)
 const dialogTitle = ref('添加个体')
 const formRef = ref(null)
+const loading = ref(false)
+const submitting = ref(false)
 
 const speciesList = ref([])
-const allIndividuals = ref([])
+const tableData = ref([])
 
 const searchForm = reactive({
   keyword: '',
@@ -171,7 +172,7 @@ const form = reactive({
   id: null,
   name: '',
   code: '',
-  speciesId: '',
+  speciesId: null,
   gender: 'male',
   age: 0,
   description: '',
@@ -186,25 +187,14 @@ const rules = {
 
 const detailData = ref(null)
 
-const filteredIndividuals = computed(() => {
-  let result = allIndividuals.value
-  if (searchForm.keyword) {
-    const keyword = searchForm.keyword.toLowerCase()
-    result = result.filter(item => 
-      item.name.toLowerCase().includes(keyword) || 
-      item.code.toLowerCase().includes(keyword)
-    )
-  }
-  if (searchForm.speciesId) {
-    result = result.filter(item => item.speciesId === searchForm.speciesId)
-  }
-  return result
-})
-
-const tableData = computed(() => {
-  const start = (pagination.currentPage - 1) * pagination.pageSize
-  const end = start + pagination.pageSize
-  return filteredIndividuals.value.slice(start, end)
+const buildPayload = () => ({
+  name: form.name,
+  code: form.code,
+  speciesId: form.speciesId,
+  gender: form.gender,
+  age: form.age,
+  description: form.description,
+  status: form.status
 })
 
 const loadSpecies = async () => {
@@ -218,26 +208,24 @@ const loadSpecies = async () => {
 }
 
 const loadIndividuals = async () => {
+  loading.value = true
   try {
-    const response = await axios.get('/api/individuals', {
+    const data = await request.get('/individuals', {
       params: {
         page: pagination.currentPage,
         size: pagination.pageSize,
-        keyword: searchForm.keyword,
-        speciesId: searchForm.speciesId
+        keyword: searchForm.keyword || undefined,
+        speciesId: searchForm.speciesId || undefined
       }
     })
-    allIndividuals.value = response.data.content
-    pagination.total = response.data.totalElements
+    tableData.value = data.content || []
+    pagination.total = data.totalElements || 0
   } catch (error) {
-    allIndividuals.value = [
-      { id: 1, name: '小象甲', code: 'IND001', speciesId: 1, speciesName: '亚洲象', gender: 'male', age: 5, status: 'active', description: '性格温顺', createTime: '2024-01-15' },
-      { id: 2, name: '母象乙', code: 'IND002', speciesId: 1, speciesName: '亚洲象', gender: 'female', age: 12, status: 'active', description: '群体领导者', createTime: '2024-02-20' },
-      { id: 3, name: '幼象丙', code: 'IND003', speciesId: 2, speciesName: '非洲象', gender: 'male', age: 2, status: 'active', description: '活泼好动', createTime: '2024-03-10' },
-      { id: 4, name: '老象丁', code: 'IND004', speciesId: 2, speciesName: '非洲象', gender: 'female', age: 25, status: 'inactive', description: '已退役', createTime: '2024-04-05' },
-      { id: 5, name: '猴子戊', code: 'IND005', speciesId: 3, speciesName: '金丝猴', gender: 'male', age: 8, status: 'active', description: '擅长攀爬', createTime: '2024-05-18' }
-    ]
-    pagination.total = allIndividuals.value.length
+    tableData.value = []
+    pagination.total = 0
+    ElMessage.error(error.message || '获取个体列表失败')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -266,6 +254,12 @@ const viewDetail = (row) => {
   showDetailDialog.value = true
 }
 
+const openAddDialog = () => {
+  dialogTitle.value = '添加个体'
+  resetForm()
+  showAddDialog.value = true
+}
+
 const editIndividual = (row) => {
   dialogTitle.value = '编辑个体'
   Object.assign(form, row)
@@ -278,46 +272,36 @@ const deleteIndividual = async (id) => {
     cancelButtonText: '取消',
     type: 'warning'
   })
+
   try {
-    await axios.delete(`/api/individuals/${id}`)
+    await request.delete(`/individuals/${id}`)
     ElMessage.success('删除成功')
     loadIndividuals()
   } catch (error) {
-    allIndividuals.value = allIndividuals.value.filter(item => item.id !== id)
-    ElMessage.success('删除成功')
+    ElMessage.error(error.message || '删除失败')
   }
 }
 
 const submitForm = async () => {
   await formRef.value.validate()
-  const species = speciesList.value.find(s => s.id === form.speciesId)
-  const speciesName = species ? species.name : ''
-  
+  submitting.value = true
+
   try {
+    const payload = buildPayload()
     if (form.id) {
-      await axios.put(`/api/individuals/${form.id}`, form)
+      await request.put(`/individuals/${form.id}`, payload)
       ElMessage.success('修改成功')
     } else {
-      await axios.post('/api/individuals', form)
+      await request.post('/individuals', payload)
       ElMessage.success('添加成功')
     }
     showAddDialog.value = false
     resetForm()
     loadIndividuals()
   } catch (error) {
-    if (form.id) {
-      const index = allIndividuals.value.findIndex(item => item.id === form.id)
-      if (index !== -1) {
-        allIndividuals.value[index] = { ...form, speciesName }
-      }
-      ElMessage.success('修改成功')
-    } else {
-      form.id = Date.now()
-      allIndividuals.value.push({ ...form, speciesName, createTime: new Date().toISOString().split('T')[0] })
-      ElMessage.success('添加成功')
-    }
-    showAddDialog.value = false
-    resetForm()
+    ElMessage.error(error.message || '保存失败')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -325,11 +309,12 @@ const resetForm = () => {
   form.id = null
   form.name = ''
   form.code = ''
-  form.speciesId = ''
+  form.speciesId = null
   form.gender = 'male'
   form.age = 0
   form.description = ''
   form.status = 'active'
+  formRef.value?.clearValidate()
 }
 
 onMounted(() => {

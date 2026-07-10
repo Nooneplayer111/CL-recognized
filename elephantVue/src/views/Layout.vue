@@ -17,6 +17,10 @@
           <el-icon><VideoCamera /></el-icon>
           <span>摄像头管理</span>
         </el-menu-item>
+        <el-menu-item index="/recognition" @click="handleMenuClick('/recognition')">
+          <el-icon><Document /></el-icon>
+          <span>识别记录</span>
+        </el-menu-item>
         <el-menu-item index="/profile" @click="handleMenuClick('/profile')">
           <el-icon><Setting /></el-icon>
           <span>个人中心</span>
@@ -55,7 +59,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Menu, User, VideoCamera, Setting, ArrowDown } from '@element-plus/icons-vue'
+import { Menu, User, VideoCamera, Setting, ArrowDown, Document } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -67,6 +71,7 @@ const pageTitleMap = {
   '/species': '物种管理',
   '/individual': '个体管理',
   '/camera': '摄像头管理',
+  '/recognition': '识别记录',
   '/profile': '个人中心'
 }
 

@@ -26,8 +26,10 @@ request.interceptors.response.use(response => {
     localStorage.removeItem('token')
     localStorage.removeItem('username')
     window.location.href = '/login'
+    return Promise.reject(error)
   }
-  return Promise.reject(error)
+  const message = error.response?.data?.msg || error.message || '请求失败'
+  return Promise.reject(new Error(message))
 })
 
 export default request
