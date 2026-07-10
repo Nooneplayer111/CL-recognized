@@ -1,0 +1,27 @@
+-- 识别记录表：存储小程序/Web 端调用模型后的识别结果
+CREATE TABLE IF NOT EXISTS recognition_record (
+    id                  BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    media_type          VARCHAR(16)     NOT NULL                COMMENT '媒体类型：image-图片 / video-视频',
+    source              VARCHAR(32)     NOT NULL DEFAULT 'miniprogram' COMMENT '来源：miniprogram-小程序 / web-Web端',
+    source_type         VARCHAR(32)     NULL                    COMMENT '采集方式：camera-拍照 / album-相册',
+    operator_name       VARCHAR(64)     NULL                    COMMENT '识别用户（小程序昵称或Web用户名）',
+    user_id             BIGINT          NULL                    COMMENT 'Web端登录用户ID',
+    media_url           VARCHAR(512)    NULL                    COMMENT '识别图片/原始视频访问地址',
+    processed_video_url VARCHAR(512)    NULL                    COMMENT '模型处理后视频地址',
+    predicted_name      VARCHAR(128)    NULL                    COMMENT '模型判断的主要结果名称',
+    confidence          DECIMAL(6, 2)   NULL                    COMMENT '置信度（0-100）',
+    all_probs           JSON            NULL                    COMMENT '图片识别各类别概率',
+    elephant_count      INT             NULL                    COMMENT '视频识别大象数量',
+    frame_count         INT             NULL                    COMMENT '视频处理帧数',
+    elephants           JSON            NULL                    COMMENT '视频识别大象列表',
+    individual_id       BIGINT          NULL                    COMMENT '关联个体ID（按名称匹配）',
+    status              VARCHAR(16)     NOT NULL DEFAULT 'success' COMMENT '状态：success-成功 / failed-失败',
+    error_message       VARCHAR(512)    NULL                    COMMENT '失败原因',
+    create_time         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '识别时间',
+    update_time         DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    KEY idx_create_time (create_time),
+    KEY idx_media_type (media_type),
+    KEY idx_operator_name (operator_name),
+    KEY idx_predicted_name (predicted_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='识别记录表';
