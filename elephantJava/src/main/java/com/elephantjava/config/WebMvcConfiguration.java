@@ -2,6 +2,7 @@ package com.elephantjava.config;
 
 
 import com.elephantjava.interceptor.JwtTokenUserInterceptor;
+import com.elephantjava.interceptor.VisitorSessionInterceptor;
 import com.elephantjava.properties.UploadProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     private JwtTokenUserInterceptor jwtTokenUserInterceptor;
 
     @Autowired
+    private VisitorSessionInterceptor visitorSessionInterceptor;
+
+    @Autowired
     private UploadProperties uploadProperties;
 
     /**
@@ -34,7 +38,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/user/login", "/open/**");
+                .excludePathPatterns("/user/login", "/user/register", "/open/**", "/v1/**");
+        registry.addInterceptor(visitorSessionInterceptor)
+                .addPathPatterns("/v1/**");
     }
 
     /**

@@ -1,0 +1,12 @@
+{
+  "_note": "虚构业务回包；积分以 MySQL 权威记账为准，不能从该 JSON 推导真实用户信息",
+  "checkin": {
+    "request": {"recognitionJobId": 90001},
+    "response": {"code": 1, "data": {"checkinId": 30001, "speciesId": 1, "bizDate": "20261106", "rank": 1, "awardedPoints": 50, "alreadyCheckedIn": false, "walletBalance": 50}}
+  },
+  "mall": {
+    "product": {"goodsId": 7001, "goodsName": "虚构纪念徽章", "pricePoints": 20, "stock": 10, "limitPerUser": 1, "status": "ON"},
+    "redeemRequest": {"goodsId": 7001, "requestId": "demo-checkout-uuid-1"},
+    "redeemResponse": {"code": 1, "data": {"orderId": 80001, "requestId": "demo-checkout-uuid-1", "status": "CREATED", "costPoints": 20, "walletBalance": 30}}
+  }
+}

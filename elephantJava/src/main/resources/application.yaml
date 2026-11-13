@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/animal-recognition?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://127.0.0.1:3306/changlongdb?useSSL=false&serverTimezone=UTC
     username: root
     password: 1234
   servlet:
@@ -11,6 +11,9 @@ spring:
 
 server:
   port: 8082
+  tomcat:
+    max-http-form-post-size: 10MB
+    max-swallow-size: 10MB
 
 # MyBatis-Plus 配置
 mybatis-plus:
@@ -26,6 +29,12 @@ elephant:
   upload:
     path: uploads
     access-path: /uploads
+  recognition:
+    predict-url: https://recognize.liangzhihuamei.xyz/predict
+    predict-video-url: https://recognize.liangzhihuamei.xyz/predict-video
+    public-base-url: http://localhost:8082
+    known-threshold: 75
+    review-threshold: 45
 
 sky:
   jwt:

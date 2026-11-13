@@ -1,0 +1,24 @@
+{
+  "_note": "完全虚构，仅供测试小程序展示、WebSocket eventId 去重与数据契约；不是识别算法实测结果",
+  "sessionId": 5001,
+  "recognitionJobId": 90001,
+  "events": [
+    {"eventId": 1, "sessionId": 5001, "type": "stage", "payload": {"stage": "species", "status": "running"}},
+    {"eventId": 2, "sessionId": 5001, "type": "species", "payload": {"speciesCode": "elephant", "speciesName": "亚洲象", "modelScore": 91.2, "needConfirm": false}},
+    {"eventId": 3, "sessionId": 5001, "type": "stage", "payload": {"stage": "individual", "status": "running"}},
+    {"eventId": 4, "sessionId": 5001, "type": "individual", "payload": {"recognitionJobId": 90001, "status": "recognized", "individualId": 17, "individualCode": "ELE-DEMO-003", "modelScore": 87.1}},
+    {"eventId": 5, "sessionId": 5001, "type": "profile", "payload": {"animalCard": {"individualId": 17, "individualCode": "ELE-DEMO-003", "name": "演示大象 A", "speciesCode": "elephant", "speciesName": "亚洲象", "avatarUrl": null, "ageDisplay": "年龄暂未核实", "ageSource": null, "gender": "unknown", "status": "active", "description": "来自虚构数据库记录，正式产品需真实审核", "lastVerifiedAt": null}}},
+    {"eventId": 6, "sessionId": 5001, "type": "done", "payload": {"recognitionJobId": 90001, "status": "recognized", "eligibleForCheckin": true}}
+  ],
+  "restFallback": {
+    "code": 1,
+    "data": {
+      "recognitionJobId": 90001,
+      "status": "recognized",
+      "speciesId": 1,
+      "individualId": 17,
+      "animalCard": {"individualId": 17, "name": "演示大象 A", "avatarUrl": null, "ageDisplay": "年龄暂未核实"},
+      "eligibleForCheckin": true
+    }
+  }
+}

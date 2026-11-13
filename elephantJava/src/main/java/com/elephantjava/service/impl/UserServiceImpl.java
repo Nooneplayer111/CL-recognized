@@ -8,22 +8,30 @@ import com.elephantjava.contex.BaseContext;
 import com.elephantjava.dto.ChangePasswordDTO;
 import com.elephantjava.dto.UserInfoDTO;
 import com.elephantjava.dto.UserLoginDTO;
+import com.elephantjava.dto.UserRegisterDTO;
 import com.elephantjava.entity.User;
 import com.elephantjava.mapper.UserMapper;
 import com.elephantjava.service.IUserService;
 import com.elephantjava.vo.UserInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]{2,32}$");
+    private static final int REAL_NAME_MAX_LENGTH = 64;
+    private static final int PASSWORD_MIN_LENGTH = 6;
+    private static final String USER_STATUS_NORMAL = "正常";
 
     @Autowired
     private UserMapper userMapper;
@@ -50,6 +58,64 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             throw new PasswordErrorException("密码错误");
         }
 
+        return user;
+    }
+
+    /**
+     * 注册账号
+     */
+    @Override
+    public User register(UserRegisterDTO userRegisterDTO) {
+        if (userRegisterDTO == null) {
+            throw new IllegalArgumentException("用户名不能为空");
+        }
+
+        String username = userRegisterDTO.getUsername() == null ? "" : userRegisterDTO.getUsername().trim();
+        if (!StringUtils.hasText(username)) {
+            throw new IllegalArgumentException("用户名不能为空");
+        }
+        if (!USERNAME_PATTERN.matcher(username).matches()) {
+            throw new IllegalArgumentException("用户名需为2-32位字母、数字或下划线");
+        }
+
+        String password = userRegisterDTO.getPassword();
+        if (!StringUtils.hasText(password)) {
+            throw new IllegalArgumentException("密码不能为空");
+        }
+        if (password.length() < PASSWORD_MIN_LENGTH) {
+            throw new IllegalArgumentException("密码长度不能少于6位");
+        }
+        if (!password.equals(userRegisterDTO.getConfirmPassword())) {
+            throw new IllegalArgumentException("两次输入的密码不一致");
+        }
+
+        String realName = null;
+        if (StringUtils.hasText(userRegisterDTO.getRealName())) {
+            realName = userRegisterDTO.getRealName().trim();
+            if (realName.length() > REAL_NAME_MAX_LENGTH) {
+                throw new IllegalArgumentException("真实姓名不能超过64个字");
+            }
+        }
+
+        User existing = this.getOne(new QueryWrapper<User>().eq("username", username));
+        if (existing != null) {
+            throw new IllegalArgumentException("用户名已存在");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        user.setRealName(realName);
+        user.setStatus(USER_STATUS_NORMAL);
+        user.setCreateTime(now);
+        user.setUpdateTime(now);
+
+        try {
+            this.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException("用户名已存在");
+        }
         return user;
     }
 

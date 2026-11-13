@@ -33,6 +33,21 @@ const routes = [
         component: () => import('../views/RecognitionRecord.vue')
       },
       {
+        path: 'events',
+        name: 'RecognitionEvent',
+        component: () => import('../views/RecognitionEvent.vue')
+      },
+      {
+        path: 'reviews',
+        name: 'ReviewQueue',
+        component: () => import('../views/ReviewQueue.vue')
+      },
+      {
+        path: 'audits',
+        name: 'AuditLog',
+        component: () => import('../views/AuditLog.vue')
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('../views/Profile.vue')

@@ -21,6 +21,18 @@
           <el-icon><Document /></el-icon>
           <span>识别记录</span>
         </el-menu-item>
+        <el-menu-item index="/events" @click="handleMenuClick('/events')">
+          <el-icon><List /></el-icon>
+          <span>识别事件</span>
+        </el-menu-item>
+        <el-menu-item index="/reviews" @click="handleMenuClick('/reviews')">
+          <el-icon><Finished /></el-icon>
+          <span>复核队列</span>
+        </el-menu-item>
+        <el-menu-item index="/audits" @click="handleMenuClick('/audits')">
+          <el-icon><Notebook /></el-icon>
+          <span>审计日志</span>
+        </el-menu-item>
         <el-menu-item index="/profile" @click="handleMenuClick('/profile')">
           <el-icon><Setting /></el-icon>
           <span>个人中心</span>
@@ -59,7 +71,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Menu, User, VideoCamera, Setting, ArrowDown, Document } from '@element-plus/icons-vue'
+import { Menu, User, VideoCamera, Setting, ArrowDown, Document, List, Finished, Notebook } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -72,6 +84,9 @@ const pageTitleMap = {
   '/individual': '个体管理',
   '/camera': '摄像头管理',
   '/recognition': '识别记录',
+  '/events': '识别事件',
+  '/reviews': '复核队列',
+  '/audits': '审计日志',
   '/profile': '个人中心'
 }
 

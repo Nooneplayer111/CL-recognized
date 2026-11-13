@@ -4,6 +4,7 @@ import com.elephantjava.constant.JwtClaimsConstant;
 import com.elephantjava.dto.ChangePasswordDTO;
 import com.elephantjava.dto.UserInfoDTO;
 import com.elephantjava.dto.UserLoginDTO;
+import com.elephantjava.dto.UserRegisterDTO;
 import com.elephantjava.entity.User;
 import com.elephantjava.properties.JwtProperties;
 import com.elephantjava.result.Result;
@@ -41,6 +42,29 @@ public class UserController {
         User user = userService.login(userLoginDTO);
 
         // 登录成功后，生成 JWT 令牌
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstant.USER_ID, user.getId());
+        String token = JwtUtil.createJWT(
+                jwtProperties.getAdminSecretKey(),
+                jwtProperties.getAdminTtl(),
+                claims);
+
+        UserLoginVo userLoginVo = UserLoginVo.builder()
+                .userName(user.getUsername())
+                .token(token)
+                .build();
+
+        return Result.success(userLoginVo);
+    }
+
+    /**
+     * 注册账号。成功后直接签发登录令牌，与登录返回一致。
+     */
+    @PostMapping("/register")
+    public Result<UserLoginVo> register(@RequestBody UserRegisterDTO userRegisterDTO) {
+        log.info("用户注册: {}", userRegisterDTO == null ? null : userRegisterDTO.getUsername());
+        User user = userService.register(userRegisterDTO);
+
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = JwtUtil.createJWT(
