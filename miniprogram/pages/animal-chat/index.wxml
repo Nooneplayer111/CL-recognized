@@ -1,0 +1,63 @@
+<view class="chat-page">
+  <view class="chat-bar">
+    <text class="chat-bar__action" bindtap="openHistory">对话记录</text>
+  </view>
+
+  <view wx:if="{{pageError}}" class="session-alert" role="alert">
+    <text class="session-alert__copy">{{pageError}}</text>
+    <text class="session-alert__action" bindtap="prepare">重试</text>
+  </view>
+
+  <scroll-view class="thread" scroll-y scroll-into-view="{{anchor}}" scroll-with-animation enhanced show-scrollbar="{{false}}">
+    <view id="welcome" class="welcome">
+      <view class="welcome-title">{{welcome}}</view>
+      <view class="assistant-bubble">{{greeting}}</view>
+    </view>
+
+    <view wx:if="{{showSuggestions && suggestions.length}}" class="suggest-block">
+      <view class="suggest-label">试试问一下</view>
+      <view wx:for="{{suggestions}}" wx:key="*this" class="suggest-item" data-text="{{item}}" bindtap="askSuggestion">{{item}}</view>
+    </view>
+
+    <block wx:for="{{messages}}" wx:key="key">
+      <view wx:if="{{item.role === 'user'}}" id="m{{item.key}}" class="user-row"><view class="user-bubble">{{item.content}}</view></view>
+      <view wx:elif="{{item.role === 'assistant'}}" id="m{{item.key}}" class="assistant-bubble">{{item.content}}</view>
+      <view wx:else id="m{{item.key}}" class="local-note">{{item.content}}</view>
+    </block>
+
+    <view wx:if="{{sending}}" id="typing" class="assistant-bubble assistant-bubble--typing">正在输入</view>
+    <view wx:if="{{sendError}}" class="send-error">
+      <text>{{sendError}}</text>
+      <text class="inline-action" bindtap="retrySend">重试</text>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{animal}}" class="composer">
+    <view class="composer-actions">
+      <button class="chip" data-source="camera" bindtap="startCapture">拍照识别</button>
+      <button class="chip" data-source="album" bindtap="startCapture">本地照片</button>
+    </view>
+    <view class="composer-row">
+      <input class="composer-input" value="{{draftText}}" disabled="{{sending}}" maxlength="2000" bindinput="onInput" confirm-type="send" bindconfirm="sendDraft" placeholder="这里输入你的问题" placeholder-class="composer-placeholder" />
+      <button class="send-button" disabled="{{sending}}" bindtap="sendDraft">发送</button>
+    </view>
+  </view>
+
+  <view wx:if="{{showHistory}}" class="history-mask" bindtap="closeHistory">
+    <view class="history-sheet" catchtap="noop">
+      <view class="history-head">
+        <text>对话记录</text>
+        <text class="history-fresh" bindtap="startFresh">新开一轮</text>
+      </view>
+      <view wx:if="{{historyLoading}}" class="history-empty">正在加载…</view>
+      <view wx:elif="{{historyError}}" class="history-empty history-empty--error">{{historyError}}</view>
+      <scroll-view wx:elif="{{historyItems.length}}" class="history-list" scroll-y>
+        <view wx:for="{{historyItems}}" wx:key="sessionId" class="history-item" data-id="{{item.sessionId}}" bindtap="openSession">
+          <view class="history-item__title">{{item.title}}</view>
+          <view class="history-item__time">{{item.createdAt}}</view>
+        </view>
+      </scroll-view>
+      <view wx:else class="history-empty">还没有对话记录</view>
+    </view>
+  </view>
+</view>

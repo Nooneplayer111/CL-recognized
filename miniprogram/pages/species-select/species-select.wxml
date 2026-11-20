@@ -1,0 +1,23 @@
+<view class="container">
+  <view class="header">
+    <view class="title">选择物种</view>
+    <view class="subtitle">请选择要识别的动物种类</view>
+  </view>
+
+  <view class="species-grid">
+    <view
+      wx:for="{{ speciesList }}"
+      wx:key="id"
+      class="species-card {{ item.available ? '' : 'disabled' }}"
+      data-available="{{ item.available }}"
+      data-url="{{ item.url }}"
+      data-name="{{ item.name }}"
+      bindtap="onSpeciesTap"
+    >
+      <view class="species-icon">{{ item.icon }}</view>
+      <view class="species-name">{{ item.name }}</view>
+      <view class="species-desc">{{ item.desc }}</view>
+      <view wx:if="{{ !item.available }}" class="coming-soon">即将上线</view>
+    </view>
+  </view>
+</view>

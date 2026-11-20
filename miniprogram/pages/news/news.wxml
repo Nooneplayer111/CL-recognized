@@ -1,0 +1,7 @@
+<view class="container">
+  <view class="placeholder-card">
+    <view class="placeholder-icon">📰</view>
+    <view class="placeholder-title">动物资讯</view>
+    <view class="placeholder-desc">功能开发中，敬请期待</view>
+  </view>
+</view>

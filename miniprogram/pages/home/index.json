@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "长隆动物识别",
+  "usingComponents": {
+    "source-banner": "/components/source-banner/index"
+  }
+}

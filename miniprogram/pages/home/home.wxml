@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="hero">
+    <view class="hero-badge">Chimelong</view>
+    <view class="hero-title">长隆之家</view>
+    <view class="hero-subtitle">探索动物世界，发现自然之美</view>
+  </view>
+
+  <view class="menu-grid">
+    <view
+      wx:for="{{ menuItems }}"
+      wx:key="id"
+      class="menu-card"
+      data-url="{{ item.url }}"
+      bindtap="onMenuTap"
+    >
+      <view class="menu-icon-wrap" style="background: {{ item.color }}20;">
+        <text class="menu-icon">{{ item.icon }}</text>
+      </view>
+      <view class="menu-info">
+        <view class="menu-title">{{ item.title }}</view>
+        <view class="menu-desc">{{ item.desc }}</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <view class="footer-text">欢迎来到长隆野生动物世界</view>
+  </view>
+</view>

@@ -1,0 +1,90 @@
+.deletion-options {
+  margin-top: 36rpx;
+}
+
+.deletion-card {
+  margin-bottom: 22rpx;
+  padding: 32rpx;
+}
+
+.deletion-card__index {
+  color: #b56532;
+  font-size: 23rpx;
+  font-weight: 850;
+}
+
+.deletion-card__title {
+  margin-top: 16rpx;
+  color: #1d4437;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.deletion-card__copy {
+  margin-top: 12rpx;
+  color: #707d77;
+  font-size: 25rpx;
+  line-height: 1.65;
+}
+
+.deletion-card__button {
+  width: 100%;
+  margin-top: 26rpx;
+}
+
+.job-card {
+  margin-top: 34rpx;
+  padding: 32rpx;
+  border-top: 8rpx solid #d18743;
+}
+
+.job-card--COMPLETED {
+  border-top-color: #238063;
+}
+
+.job-card__label {
+  color: #8a6546;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.job-card__state {
+  margin-top: 12rpx;
+  color: #21483b;
+  font-size: 36rpx;
+  font-weight: 850;
+}
+
+.job-card__id,
+.job-card__copy {
+  margin-top: 12rpx;
+  color: #707c77;
+  font-size: 23rpx;
+  line-height: 1.55;
+  word-break: break-all;
+}
+
+.job-card__button { margin-top: 24rpx; }
+
+.history-delete-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  color: #173c31;
+  font-size: 26rpx;
+}
+
+.history-delete-row .danger-button {
+  min-height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 24rpx;
+}
+
+.deletion-note {
+  margin: 28rpx 8rpx;
+  color: #806d5d;
+  font-size: 23rpx;
+  line-height: 1.65;
+}

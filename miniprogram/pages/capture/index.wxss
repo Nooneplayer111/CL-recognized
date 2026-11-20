@@ -1,0 +1,72 @@
+.capture-animal { margin-top: 26rpx; display: flex; align-items: center; gap: 18rpx; }
+.capture-animal__icon { width: 72rpx; height: 72rpx; display: flex; align-items: center; justify-content: center; background: #f0f4f1; border-radius: 50%; font-size: 40rpx; }
+.capture-animal__name { color: #1d1d1f; font-size: 28rpx; font-weight: 700; }
+.capture-animal__route { margin-top: 5rpx; color: #718078; font-size: 21rpx; }
+
+.preview-card {
+  height: 620rpx;
+  margin: 34rpx 0 24rpx;
+  overflow: hidden;
+  padding: 18rpx;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 24rpx;
+  background: #e9ede7;
+}
+
+.preview-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(135deg, #f0f2ed, #f0f2ed 20rpx, #e9eee8 20rpx, #e9eee8 40rpx);
+  border: 2rpx dashed #aab8b0;
+  border-radius: 24rpx;
+}
+
+.preview-frame {
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3d695a;
+  background: #ffffff;
+  border-radius: 28rpx;
+  font-size: 48rpx;
+}
+
+.quality-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+  color: #68766f;
+  font-size: 23rpx;
+}
+
+.quality-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.quality-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #d59045;
+  border-radius: 50%;
+}
+
+.quality-dot--good {
+  background: #2a8468;
+}
+
+.media-secondary-button {
+  margin-top: 18rpx;
+}

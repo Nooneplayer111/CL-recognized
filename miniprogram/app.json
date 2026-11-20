@@ -1,0 +1,26 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/animal-chat/index",
+    "pages/privacy/index",
+    "pages/capture/index",
+    "pages/processing/index",
+    "pages/result/index",
+    "pages/elephant/index",
+    "pages/deletion/index",
+    "pages/video-result/video-result"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F7F3EA",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "长隆动物识别",
+    "backgroundColor": "#F7F3EA",
+    "backgroundTextStyle": "dark"
+  },
+  "permission": {
+    "scope.camera": {
+      "desc": "需要使用摄像头拍照识别动物"
+    }
+  },
+  "style": "v2"
+}

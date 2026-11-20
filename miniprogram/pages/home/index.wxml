@@ -1,0 +1,76 @@
+<view class="home-page">
+  <view class="topbar">
+    <view class="brand">
+      <view class="brand-mark" aria-hidden="true"><view class="brand-lens"></view></view>
+      <text>长隆动物识别</text>
+    </view>
+  </view>
+
+  <view wx:if="{{sessionError}}" class="session-alert" role="alert">
+    <text class="session-alert__copy">服务连接失败：{{sessionError}}</text>
+    <text class="session-alert__action" bindtap="retrySession" role="button">重试</text>
+  </view>
+
+  <view class="hero">
+    <view class="hero-copy">
+      <view class="hero-kicker"><view class="hero-dot"></view><text>动物助手</text></view>
+      <view class="hero-title">选一只，开始聊</view>
+      <view class="hero-lead">点选下面的动物，进入对应的对话。</view>
+    </view>
+    <view class="hero-animal" aria-hidden="true">🐘</view>
+  </view>
+
+  <view class="animal-section">
+    <view class="section-heading">
+      <view class="section-title">选择动物</view>
+    </view>
+
+    <view class="animal-grid">
+      <view wx:for="{{availableAnimals}}" wx:key="id" class="animal-cell">
+        <view class="animal-item" data-id="{{item.id}}" bindtap="openAnimal" aria-role="button" aria-label="进入{{item.name}}对话">
+          <view class="animal-icon" aria-hidden="true">{{item.icon}}</view>
+          <text class="animal-name">{{item.name}}</text>
+          <text wx:if="{{item.route === 'elephant'}}" class="animal-badge">专用</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="safety-copy">保持安全距离 · 不使用闪光灯 · 不越过围栏</view>
+
+  <view id="recent-history" class="secondary-section">
+    <view class="secondary-heading"><text>最近识别</text><text wx:if="{{historyItems.length}}">{{historyItems.length}} 条</text></view>
+    <view wx:if="{{recovery}}" class="recovery-row" bindtap="openRecovery" role="button">
+      <view class="recovery-dot"></view><view><view class="row-title">识别仍在处理中</view><view class="row-meta">点击继续查询进度</view></view><text class="row-chevron">›</text>
+    </view>
+    <view wx:if="{{historyLoading}}" class="empty-row">正在加载…</view>
+    <view wx:elif="{{historyError}}" class="empty-row empty-row--error"><text>{{historyError}}</text><text class="inline-action" bindtap="refreshHistory">重新加载</text></view>
+    <view wx:elif="{{visibleHistoryItems.length}}" class="history-list">
+      <view wx:for="{{visibleHistoryItems}}" wx:key="id" class="history-row" data-id="{{item.id}}" bindtap="openItem" role="button">
+        <view class="history-thumb"><image wx:if="{{item.thumbnailPath}}" src="{{item.thumbnailPath}}" mode="aspectFill"></image><text wx:else>{{item.animalIcon || item.icon || '🐘'}}</text></view>
+        <view class="history-copy"><view class="history-title">{{item.animalName || item.title}}</view><view class="history-meta">{{item.statusLabel}} · {{item.updatedAtLabel}}</view></view>
+        <text class="history-delete" catchtap="deleteItem" data-id="{{item.id}}">删除</text>
+        <text class="row-chevron">›</text>
+      </view>
+      <button wx:if="{{hasMoreHistory}}" class="history-toggle" bindtap="toggleHistory">{{showAllHistory ? '收起记录' : '查看全部记录'}}</button>
+    </view>
+    <view wx:else class="empty-row">还没有识别记录</view>
+  </view>
+
+  <view wx:if="{{elephants.length}}" class="secondary-section">
+    <view class="secondary-heading"><text>亚洲象档案</text></view>
+    <scroll-view class="profile-scroll" scroll-x enhanced show-scrollbar="false">
+      <view class="profile-row">
+        <view wx:for="{{elephants}}" wx:key="id" class="profile-card" data-id="{{item.id}}" bindtap="openProfile" role="button">
+          <view class="profile-icon">{{item.coverEmoji}}</view><view class="profile-name">{{item.displayName}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="footer-links">
+    <text bindtap="openPrivacy">隐私说明</text>
+    <text bindtap="openDeletion">删除与隐私申请</text>
+  </view>
+
+</view>

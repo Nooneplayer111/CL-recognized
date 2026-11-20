@@ -1,0 +1,78 @@
+<view class="container">
+  <!-- 标题 -->
+  <view class="header">
+    <view class="title">🐘 大象个体识别</view>
+    <view class="subtitle">视频识别结果</view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{ loading }}" class="loading">
+    <view class="loading-icon">🔄</view>
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 识别结果 -->
+  <view wx:else class="content">
+    <!-- 统计卡片 -->
+    <view class="card stats-card">
+      <view class="card-header">
+        <view class="card-title">📊 识别统计</view>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <view class="stat-value">{{ elephantCount }}</view>
+          <view class="stat-label">大象数量</view>
+        </view>
+        <view class="stat-item">
+          <view class="stat-value">{{ frameCount }}</view>
+          <view class="stat-label">处理帧数</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 大象列表 -->
+    <view wx:if="{{ elephants.length > 0 }}" class="card elephant-list-card">
+      <view class="card-header">
+        <view class="card-title">🐘 识别到的大象</view>
+      </view>
+      <view class="elephant-list">
+        <view wx:for="{{ elephants }}" wx:key="id" class="elephant-item">
+          <view class="elephant-color" style="background-color: {{ item.color }}"></view>
+          <view class="elephant-info">
+            <view class="elephant-name">{{ item.name }}</view>
+            <view class="elephant-confidence">置信度: {{ item.confidencePercent }}%</view>
+          </view>
+          <view class="elephant-id">ID: {{ item.id }}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 下载按钮 -->
+    <view class="card download-card">
+      <view class="card-header">
+        <view class="card-title">📥 下载处理后的视频</view>
+      </view>
+      <view class="download-content">
+        <view wx:if="{{ !downloaded }}" class="download-tip">
+          处理后的视频已保存到服务器，请点击下方按钮下载保存到手机相册。
+        </view>
+        <view wx:else class="download-success">
+          ✅ 视频已成功保存到相册！
+        </view>
+        
+        <button 
+          wx:if="{{ !downloaded }}"
+          class="download-btn" 
+          bindtap="downloadVideo" 
+          loading="{{ downloading }}"
+          disabled="{{ downloading }}">
+          {{ downloading ? '下载中...' : '下载视频' }}
+        </button>
+        
+        <view wx:if="{{ downloaded }}" class="back-btn-wrap">
+          <button class="back-btn" bindtap="goBack">返回首页</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+<view class="status-card status-card--{{tone}} card" aria-label="{{label}}，{{title}}{{description ? '。' + description : ''}}">
+  <view class="status-card__topline">
+    <view class="status-card__icon" aria-hidden="true">{{icon}}</view>
+    <view class="status-card__label">{{label}}</view>
+  </view>
+  <view class="status-card__title">{{title}}</view>
+  <view wx:if="{{description}}" class="status-card__description">{{description}}</view>
+  <view wx:if="{{sourceNotice}}" class="status-card__source">{{sourceNotice}}</view>
+</view>

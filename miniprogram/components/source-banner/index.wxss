@@ -1,0 +1,29 @@
+.source-banner {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 22rpx 24rpx;
+  background: #fff4df;
+  border: 1rpx solid #efcf94;
+  border-radius: 24rpx;
+  color: #754d25;
+}
+
+.source-banner__dot {
+  width: 18rpx;
+  height: 18rpx;
+  flex: 0 0 auto;
+  background: #e5953f;
+  border-radius: 50%;
+}
+
+.source-banner--error {
+  background: #fff0ed;
+  border-color: #e3a89d;
+  color: #8d3224;
+}
+
+.source-banner--error .source-banner__dot { background: #b84532; }
+
+.source-banner__title { font-size: 26rpx; font-weight: 800; }
+.source-banner__text { margin-top: 4rpx; font-size: 23rpx; line-height: 1.45; }

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "选择照片",
+  "usingComponents": {
+    "source-banner": "/components/source-banner/index"
+  }
+}

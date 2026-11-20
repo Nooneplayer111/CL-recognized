@@ -1,0 +1,84 @@
+<view class="container">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="logo">🐘</view>
+    <view class="title">大象个体识别</view>
+    <view class="subtitle">基于深度学习的智能识别系统</view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="card">
+    <view class="btn-group">
+      <view class="btn-item" bindtap="takePhoto">
+        <view class="btn-icon">📸</view>
+        <view class="btn-label">拍照识别</view>
+      </view>
+      <view class="btn-item" bindtap="chooseImage">
+        <view class="btn-icon">📁</view>
+        <view class="btn-label">相册选择</view>
+      </view>
+    </view>
+    
+    <!-- 录制识别按钮 -->
+    <view class="btn-group">
+      <view class="btn-item video-btn" bindtap="recordVideo">
+        <view class="btn-icon">🎬</view>
+        <view class="btn-label">录制识别</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 视频预览 -->
+  <view wx:if="{{ hasVideo }}" class="card video-preview-card">
+    <view class="preview-header">
+      <view class="preview-title">录制的视频</view>
+      <view class="remove-btn" bindtap="removeVideo">✕</view>
+    </view>
+    <video 
+      src="{{ videoPath }}" 
+      class="preview-video" 
+      autoplay 
+      loop 
+      controls
+    />
+    <view class="video-info">
+      <view class="video-duration">时长: {{ videoDuration }}</view>
+    </view>
+  </view>
+
+  <!-- 识别结果 -->
+  <view wx:if="{{ showResult }}" class="card result-card">
+    <view class="result-header">
+      <view class="result-title">识别结果</view>
+      <view class="result-conf" :class="confLevelClass">{{ confLevelText }}</view>
+    </view>
+    
+    <view class="result-main">
+      <view class="elephant-icon">🐘</view>
+      <view class="elephant-name">{{ result.elephant_name }}</view>
+      <view class="elephant-conf">置信度: {{ result.confidence }}%</view>
+    </view>
+    
+    <view class="result-detail">
+      <view class="detail-title">各类别概率分布</view>
+      <view wx:for="{{ sortedProbs }}" wx:key="name" class="prob-item">
+        <view class="prob-name">{{ item.name }}</view>
+        <view class="prob-bar-wrap">
+          <view class="prob-bar" :style="{ width: item.prob + '%' }" :class="getProbClass(item.prob)"></view>
+        </view>
+        <view class="prob-value">{{ item.prob.toFixed(1) }}%</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{ loading }}" class="loading-overlay">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">正在识别中...</view>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer">
+    <view class="footer-text">💡 提示：确保大象在画面中清晰可见</view>
+  </view>
+</view>

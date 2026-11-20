@@ -1,0 +1,36 @@
+<view class="page-shell privacy-page">
+  <view class="eyebrow">PRIVACY FIRST</view>
+  <view class="page-title">先说明，再拍照</view>
+  <view class="page-lead">未同意前不会调用相机或相册。</view>
+
+  <view class="card privacy-card">
+    <view class="privacy-item">
+      <view class="privacy-index">01</view>
+      <view>
+        <view class="privacy-title">处理什么</view>
+        <view class="privacy-copy">你主动选择的一张动物照片，以及恢复异步识别任务所需的最小引用。</view>
+      </view>
+    </view>
+    <view class="divider"></view>
+    <view class="privacy-item">
+      <view class="privacy-index">02</view>
+      <view>
+        <view class="privacy-title">为什么处理</view>
+        <view class="privacy-copy">仅用于图片识别、结果历史和删除流程；不会用于广告或游客画像。</view>
+      </view>
+    </view>
+    <view class="divider"></view>
+    <view class="privacy-item">
+      <view class="privacy-index">03</view>
+      <view>
+        <view class="privacy-title">如何确认处理位置</view>
+        <view class="privacy-copy">发布模式必须配置合法域名和真实上传能力，否则安全停止。</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="privacy-note">正式上线前，保留期限、未成年人方案、客服渠道和平台隐私配置必须由长隆法务与安全团队确认。</view>
+
+  <button id="agree-btn" class="primary-button" bindtap="accept" aria-label="同意隐私说明并继续">同意并继续</button>
+  <button class="ghost-button privacy-decline" bindtap="decline" aria-label="暂不同意，仅浏览公开内容">暂不同意，仅浏览公开内容</button>
+</view>

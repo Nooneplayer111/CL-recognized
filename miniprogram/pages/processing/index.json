@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "识别处理中",
+  "usingComponents": {
+    "status-panel": "/components/status-panel/index",
+    "source-banner": "/components/source-banner/index"
+  }
+}

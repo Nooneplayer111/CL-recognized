@@ -1,0 +1,27 @@
+<view class="page-shell capture-page">
+  <source-banner></source-banner>
+  <view class="capture-animal"><view class="capture-animal__icon">{{animal.icon}}</view><view><view class="capture-animal__name">{{animal.name}}</view><view class="capture-animal__route">{{animal.routeLabel}}</view></view></view>
+  <view class="page-title">{{draft ? '确认这张照片' : sourceLabel + '选择'}}</view>
+  <view class="page-lead">确认前不会上传。请让{{animal.name}}清晰、完整地出现在画面中。</view>
+  <view wx:if="{{error}}" class="inline-error" role="alert">{{error}}</view>
+
+  <view class="preview-card card">
+    <image wx:if="{{draft && draft.tempFilePath}}" class="preview-image" src="{{draft.tempFilePath}}" mode="aspectFit" aria-label="刚刚选择的{{animal.name}}照片预览"></image>
+    <view wx:else class="preview-placeholder" aria-label="尚未选择照片">
+      <view class="preview-frame" aria-hidden="true">＋</view>
+      <view class="preview-placeholder__title">尚未选择照片</view>
+      <view class="preview-placeholder__copy">选择清晰、无遮挡的{{animal.name}}照片</view>
+    </view>
+  </view>
+
+  <view class="quality-grid">
+    <view class="quality-item"><view class="quality-dot quality-dot--good"></view>光线充足</view>
+    <view class="quality-item"><view class="quality-dot quality-dot--good"></view>画面清晰</view>
+    <view class="quality-item"><view class="quality-dot"></view>优先单只</view>
+  </view>
+
+  <button wx:if="{{!draft}}" class="primary-button" loading="{{choosing}}" bindtap="chooseMedia">{{choosing ? '正在打开…' : '打开' + sourceLabel}}</button>
+
+  <button wx:if="{{draft}}" class="primary-button" bindtap="continueFlow">使用此图，识别{{animal.name}}</button>
+  <button wx:if="{{draft}}" class="ghost-button media-secondary-button" bindtap="chooseMedia">重新{{sourceLabel}}</button>
+</view>

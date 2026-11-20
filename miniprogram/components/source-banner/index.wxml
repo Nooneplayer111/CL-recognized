@@ -1,0 +1,7 @@
+<view wx:if="{{source.errorCode}}" class="source-banner source-banner--error" aria-label="服务暂不可用，{{source.message}}">
+  <view class="source-banner__dot" aria-hidden="true"></view>
+  <view>
+    <view class="source-banner__title">服务暂不可用</view>
+    <view class="source-banner__text">{{source.message}}</view>
+  </view>
+</view>

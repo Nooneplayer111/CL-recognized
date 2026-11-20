@@ -1,0 +1,43 @@
+<view wx:if="{{loading}}" class="page-shell empty-profile"><view class="page-title">正在加载公开档案…</view></view>
+<view wx:elif="{{error}}" class="page-shell empty-profile" role="alert"><view class="page-title">公开档案暂不可用</view><view class="page-lead">{{error}}</view><button class="primary-button empty-profile__button" bindtap="retry">重试</button></view>
+<view wx:elif="{{profile}}" class="profile-page">
+  <view class="profile-hero">
+    <view class="profile-hero__publication">PUBLISHED PUBLIC PROFILE</view>
+    <view class="profile-hero__art" aria-hidden="true">{{profile.coverEmoji}}</view>
+    <view class="profile-hero__name">{{profile.displayName}}</view>
+    <view class="profile-hero__mark">{{profile.heroMark}}</view>
+  </view>
+
+  <view class="profile-content">
+    <view class="profile-facts card">
+      <view class="profile-fact"><view class="profile-fact__label">性别</view><view class="profile-fact__value">{{profile.sexLabel}}</view></view>
+      <view class="profile-fact"><view class="profile-fact__label">年龄段</view><view class="profile-fact__value">{{profile.ageLabel}}</view></view>
+      <view class="profile-fact"><view class="profile-fact__label">档案状态</view><view class="profile-fact__value">已发布</view></view>
+    </view>
+
+    <view class="profile-section">
+      <view class="section-title">它的故事</view>
+      <view class="profile-copy">{{profile.story}}</view>
+    </view>
+
+    <view class="profile-section">
+      <view class="section-title">观察特点</view>
+      <view class="trait-list"><view wx:for="{{profile.traits}}" wx:key="*this" class="trait-chip">{{item}}</view></view>
+    </view>
+
+    <view class="profile-section conservation-card">
+      <view class="conservation-card__label">保育小知识</view>
+      <view class="conservation-card__copy">{{profile.conservation}}</view>
+    </view>
+
+    <view class="profile-disclaimer">{{profile.sourceNotice}}</view>
+    <button class="primary-button" bindtap="startRecognition">再识别一张照片</button>
+  </view>
+</view>
+
+<view wx:else class="page-shell empty-profile">
+  <view class="empty-profile__icon" aria-hidden="true">🌿</view>
+  <view class="page-title">公开档案暂不可用</view>
+  <view class="page-lead">这可能是未发布、已下线或不存在的公开档案。历史识别记录本身不会因此被改成失败。</view>
+  <button class="primary-button empty-profile__button" bindtap="startRecognition">返回识别首页</button>
+</view>

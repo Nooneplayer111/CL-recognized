@@ -1,0 +1,139 @@
+.result-page {
+  padding-top: 30rpx;
+}
+
+.review-notice {
+  margin-top: 24rpx;
+  padding: 24rpx 26rpx;
+  background: #e9f2ed;
+  border-left: 8rpx solid #258064;
+  border-radius: 0 24rpx 24rpx 0;
+}
+
+.review-notice__title {
+  color: #215b47;
+  font-weight: 800;
+}
+
+.review-notice__copy {
+  margin-top: 8rpx;
+  color: #63746d;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.reason-card {
+  margin-top: 28rpx;
+  padding: 30rpx;
+}
+
+.reason-row {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  color: #65726c;
+}
+
+.reason-dot {
+  width: 14rpx;
+  height: 14rpx;
+  background: #d3843c;
+  border-radius: 50%;
+}
+
+.targets-section {
+  margin-top: 38rpx;
+}
+
+.target-card {
+  margin-top: 18rpx;
+  display: grid;
+  grid-template-columns: 58rpx 1fr auto;
+  align-items: center;
+  gap: 16rpx;
+  padding: 26rpx;
+  border-left: 8rpx solid #87968f;
+}
+
+.target-card--success { border-left-color: #238063; }
+.target-card--warning { border-left-color: #d38642; }
+
+.target-order {
+  color: #af6939;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.target-title {
+  color: #24473a;
+  font-size: 28rpx;
+  font-weight: 750;
+}
+
+.target-label {
+  margin-top: 6rpx;
+  color: #78837f;
+  font-size: 23rpx;
+}
+
+.target-link {
+  min-width: 100rpx;
+  min-height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #166b55;
+  font-weight: 750;
+}
+
+.result-primary {
+  margin-top: 30rpx;
+}
+
+.feedback-card {
+  margin-top: 30rpx;
+  padding: 30rpx;
+}
+
+.feedback-title {
+  color: #183e32;
+  font-size: 31rpx;
+  font-weight: 800;
+}
+
+.feedback-copy {
+  margin-top: 8rpx;
+  color: #78837e;
+  font-size: 24rpx;
+  line-height: 1.55;
+}
+
+.feedback-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  margin-top: 22rpx;
+}
+
+.feedback-option {
+  min-height: 78rpx;
+  padding: 0 12rpx;
+  color: #315c4d;
+  background: #eef3ef;
+  line-height: 78rpx;
+  font-size: 24rpx;
+}
+
+.feedback-submitted {
+  margin-top: 22rpx;
+  padding: 20rpx;
+  color: #29634e;
+  background: #e6f0ea;
+  border-radius: 18rpx;
+  font-size: 25rpx;
+}
+
+.history-link {
+  margin-top: 20rpx;
+}

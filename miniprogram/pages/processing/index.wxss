@@ -1,0 +1,113 @@
+.processing-page {
+  padding-top: 24rpx;
+}
+
+.upload-stage,
+.task-stage {
+  margin-top: 54rpx;
+}
+
+.processing-orbit {
+  width: 120rpx;
+  height: 120rpx;
+  margin: 0 auto 38rpx;
+  position: relative;
+  border: 3rpx solid #c6d8cf;
+  border-radius: 50%;
+  animation: orbit-spin 1.8s linear infinite;
+}
+
+.processing-orbit__dot {
+  width: 26rpx;
+  height: 26rpx;
+  position: absolute;
+  top: -10rpx;
+  left: 45rpx;
+  background: #166b55;
+  border: 6rpx solid #f7f3ea;
+  border-radius: 50%;
+}
+
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+
+.progress-card {
+  margin-top: 48rpx;
+  padding: 30rpx;
+}
+
+.progress-card__head {
+  display: flex;
+  justify-content: space-between;
+  color: #486157;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.progress-track {
+  height: 18rpx;
+  margin-top: 24rpx;
+  overflow: hidden;
+  background: #dde7e1;
+  border-radius: 999rpx;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #166b55, #52a284);
+  border-radius: 999rpx;
+  transition: width 0.2s ease;
+}
+
+.timeline-card {
+  margin-top: 28rpx;
+  padding: 30rpx;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 34rpx 1fr;
+  gap: 16rpx;
+  opacity: 0.48;
+}
+
+.timeline-item--done {
+  opacity: 1;
+}
+
+.timeline-dot {
+  width: 20rpx;
+  height: 20rpx;
+  margin-top: 8rpx;
+  background: #94a49d;
+  border-radius: 50%;
+}
+
+.timeline-item--done .timeline-dot {
+  background: #218064;
+  box-shadow: 0 0 0 8rpx #e3eee8;
+}
+
+.timeline-line {
+  width: 2rpx;
+  height: 38rpx;
+  margin: 5rpx 0 5rpx 9rpx;
+  background: #d8dedb;
+}
+
+.timeline-title {
+  color: #25473b;
+  font-size: 28rpx;
+  font-weight: 750;
+}
+
+.timeline-copy {
+  margin-top: 7rpx;
+  color: #718079;
+  font-size: 23rpx;
+}
+
+.history-button {
+  margin-top: 28rpx;
+}

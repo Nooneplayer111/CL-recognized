@@ -1,0 +1,41 @@
+.privacy-card {
+  margin-top: 36rpx;
+  padding: 8rpx 30rpx;
+}
+
+.privacy-item {
+  display: grid;
+  grid-template-columns: 72rpx 1fr;
+  gap: 16rpx;
+  padding: 28rpx 0;
+}
+
+.privacy-index {
+  color: #b26836;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.privacy-title {
+  color: #173d31;
+  font-size: 30rpx;
+  font-weight: 750;
+}
+
+.privacy-copy {
+  margin-top: 8rpx;
+  color: #68746f;
+  font-size: 26rpx;
+  line-height: 1.65;
+}
+
+.privacy-note {
+  margin: 30rpx 8rpx;
+  color: #7a6552;
+  font-size: 25rpx;
+  line-height: 1.7;
+}
+
+.privacy-decline {
+  margin-top: 18rpx;
+}

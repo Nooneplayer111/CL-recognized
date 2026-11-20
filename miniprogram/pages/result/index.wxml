@@ -1,0 +1,56 @@
+<view class="page-shell result-page">
+  <view wx:if="{{loading}}" class="empty-state card" aria-label="正在加载识别结果"><view class="empty-state__title">正在加载结果…</view></view>
+  <view wx:elif="{{error}}" class="empty-state card" role="alert">
+    <view class="empty-state__title">{{deleted ? '记录已删除' : '结果暂不可用'}}</view>
+    <view class="empty-state__copy">{{error}}</view>
+    <button wx:if="{{!deleted}}" class="primary-button empty-state__button" bindtap="retryLoad">重试</button>
+    <button class="ghost-button empty-state__button" bindtap="goHistory">回首页查看记录</button>
+  </view>
+
+  <block wx:elif="{{task}}">
+  <status-panel wx:if="{{pendingReview}}" label="待复核" title="暂未确认识别结果" description="你可以稍后在最近识别里查看。" tone="warning"></status-panel>
+  <status-panel wx:else icon="{{task.icon}}" label="{{task.statusLabel}}" title="{{task.title}}" description="{{task.description}}" tone="{{task.tone}}"></status-panel>
+
+  <view wx:if="{{task.speciesResults.length}}" class="reason-card card">
+    <view class="section-title">识别到的动物</view>
+    <view wx:for="{{task.speciesResults}}" wx:key="name" class="reason-row"><view class="reason-dot"></view>{{item.name}}<text wx:if="{{item.confidenceLabel}}"> · {{item.confidenceLabel}}</text></view>
+  </view>
+
+  <view wx:if="{{task.resultSource === 'reviewed'}}" class="review-notice">
+    <view class="review-notice__title">结论已经复核更新</view>
+  </view>
+
+  <view wx:if="{{task.qualityReasons.length}}" class="reason-card card">
+    <view class="section-title">建议重拍原因</view>
+    <view wx:for="{{task.qualityReasons}}" wx:key="*this" class="reason-row"><view class="reason-dot"></view>{{item}}</view>
+  </view>
+
+  <view wx:if="{{!pendingReview && task.targets.length}}" class="targets-section">
+    <view class="section-title">逐只结果</view>
+    <view wx:for="{{task.targets}}" wx:key="id" class="target-card card target-card--{{item.tone}}">
+      <view class="target-order">0{{item.order}}</view>
+      <view class="target-copy">
+        <view class="target-title">{{item.title}}</view>
+        <view class="target-label">{{item.statusLabel}}</view>
+      </view>
+      <view wx:if="{{item.publicProfileRef}}" class="target-link" data-id="{{item.publicProfileRef}}" bindtap="openProfile" role="button" aria-label="查看第{{item.order}}只大象的公开档案">档案 →</view>
+    </view>
+  </view>
+
+  <button wx:if="{{pendingReview}}" class="primary-button result-primary" bindtap="retryLoad">查看最新进度</button>
+  <button wx:if="{{!pendingReview && task.publicProfileRef}}" class="primary-button result-primary" bindtap="openProfile">查看公开大象档案</button>
+  <button wx:if="{{!pendingReview && task.resultKind !== 'KNOWN' && task.resultKind !== 'MULTIPLE'}}" class="primary-button result-primary" bindtap="retry">重新选择照片</button>
+
+  <view wx:if="{{!pendingReview && task.supportsFeedback !== false}}" class="feedback-card card">
+    <view class="feedback-title">这个结果有帮助吗？</view>
+    <view class="feedback-copy">反馈不会直接修改结果，也不会自动授权图片用于训练。</view>
+    <view wx:if="{{feedbackError}}" class="inline-error" role="alert">{{feedbackError}}</view>
+    <view wx:if="{{!task.feedback}}" class="feedback-options">
+      <button wx:for="{{feedbackOptions}}" wx:key="value" class="feedback-option" data-value="{{item.value}}" bindtap="submitFeedback">{{item.label}}</button>
+    </view>
+    <view wx:else class="feedback-submitted">已提交：{{task.feedback.verdict}} · {{task.feedback.status}}</view>
+  </view>
+
+  <button class="ghost-button history-link" bindtap="goHistory">回首页查看最近识别</button>
+  </block>
+</view>

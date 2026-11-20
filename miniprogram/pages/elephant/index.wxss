@@ -1,0 +1,142 @@
+.profile-page {
+  min-height: 100vh;
+  background: #f7f3ea;
+}
+
+.profile-hero {
+  min-height: 520rpx;
+  padding: 70rpx 42rpx 48rpx;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #dbe9de 0%, #f3dcb7 100%);
+  text-align: center;
+}
+
+.profile-hero::after {
+  content: "";
+  width: 380rpx;
+  height: 380rpx;
+  position: absolute;
+  right: -120rpx;
+  top: -160rpx;
+  border: 54rpx solid rgba(255, 255, 255, 0.34);
+  border-radius: 50%;
+}
+
+.profile-hero__publication {
+  color: #a75d2e;
+  font-size: 21rpx;
+  font-weight: 850;
+  letter-spacing: 4rpx;
+}
+
+.profile-hero__art {
+  margin-top: 28rpx;
+  font-size: 142rpx;
+}
+
+.profile-hero__name {
+  margin-top: 8rpx;
+  color: #153d31;
+  font-size: 62rpx;
+  font-weight: 850;
+}
+
+.profile-hero__mark {
+  margin-top: 12rpx;
+  color: #566c63;
+  font-size: 27rpx;
+}
+
+.profile-content {
+  padding: 0 32rpx calc(56rpx + env(safe-area-inset-bottom));
+}
+
+.profile-facts {
+  margin-top: -34rpx;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 28rpx 16rpx;
+}
+
+.profile-fact {
+  padding: 0 12rpx;
+  text-align: center;
+  border-right: 1rpx solid #e6e5dd;
+}
+
+.profile-fact:last-child { border-right: 0; }
+
+.profile-fact__label {
+  color: #8a938f;
+  font-size: 21rpx;
+}
+
+.profile-fact__value {
+  margin-top: 8rpx;
+  color: #264c3e;
+  font-size: 26rpx;
+  font-weight: 750;
+}
+
+.profile-section {
+  margin-top: 46rpx;
+}
+
+.profile-copy {
+  margin-top: 18rpx;
+  color: #61716a;
+  font-size: 28rpx;
+  line-height: 1.85;
+}
+
+.trait-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.trait-chip {
+  padding: 14rpx 20rpx;
+  color: #315d4d;
+  background: #e7f0e9;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+}
+
+.conservation-card {
+  padding: 28rpx;
+  background: #173f32;
+  border-radius: 28rpx;
+}
+
+.conservation-card__label {
+  color: #e7c797;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.conservation-card__copy {
+  margin-top: 12rpx;
+  color: #f0f4f1;
+  font-size: 26rpx;
+  line-height: 1.75;
+}
+
+.profile-disclaimer {
+  margin: 30rpx 4rpx;
+  color: #816d5c;
+  font-size: 23rpx;
+  line-height: 1.65;
+}
+
+.empty-profile {
+  padding-top: 110rpx;
+  text-align: center;
+}
+
+.empty-profile__icon { font-size: 98rpx; }
+.empty-profile__button { margin-top: 38rpx; }

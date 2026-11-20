@@ -1,0 +1,40 @@
+<view class="page-shell processing-page">
+  <source-banner></source-banner>
+
+  <view wx:if="{{error}}" class="error-state card" role="alert">
+    <view class="section-title">处理未完成</view>
+    <view class="page-lead">{{error}}</view>
+    <button wx:if="{{retryable}}" class="primary-button" bindtap="retry">{{recoveryPhase === 'timed_out' ? '再查一次' : '重试'}}</button>
+    <button wx:if="{{canCreateNewAttempt}}" class="primary-button" bindtap="createNewAttempt">创建新的识别尝试</button>
+    <button class="ghost-button" bindtap="goHome">返回识别首页</button>
+  </view>
+
+  <view wx:elif="{{phase === 'upload'}}" class="upload-stage">
+    <view class="processing-orbit" aria-hidden="true"><view class="processing-orbit__dot"></view></view>
+    <view class="page-title">正在准备照片</view>
+    <view class="page-lead">正在安全提交照片，请保持网络连接。</view>
+    <view class="progress-card card" aria-label="照片准备进度{{uploadProgress}}%">
+      <view class="progress-card__head"><text>照片准备</text><text>{{uploadProgress}}%</text></view>
+      <view class="progress-track"><view class="progress-fill" style="width: {{uploadProgress}}%"></view></view>
+    </view>
+  </view>
+
+  <view wx:elif="{{phase === 'task'}}" class="task-stage">
+    <view class="processing-orbit" aria-hidden="true"><view class="processing-orbit__dot"></view></view>
+    <status-panel wx:if="{{task}}" icon="{{task.icon}}" label="{{task.statusLabel}}" title="{{task.title}}" tone="{{task.tone}}"></status-panel>
+    <view wx:else class="page-title" role="status">正在查询识别进度</view>
+    <view wx:if="{{recoveryPhase === 'paused'}}" class="page-lead" role="status">小程序进入后台，已暂停轮询；返回后继续。</view>
+    <view wx:if="{{recoveryPhase === 'waiting' && lookupRetrying}}" class="page-lead" role="status">暂时没查到进度，稍后会自动再查。</view>
+
+    <view wx:if="{{task}}" class="timeline-card card">
+      <view class="timeline-item timeline-item--done"><view class="timeline-dot"></view><view><view class="timeline-title">照片已受理</view><view class="timeline-copy">照片已安全提交</view></view></view>
+      <view class="timeline-line"></view>
+      <view class="timeline-item {{task.taskState !== 'QUEUED' ? 'timeline-item--done' : ''}}"><view class="timeline-dot"></view><view><view class="timeline-title">识别任务</view><view class="timeline-copy">排队并分析照片中的动物</view></view></view>
+      <view class="timeline-line"></view>
+      <view class="timeline-item {{task.reviewState !== 'NOT_REQUIRED' ? 'timeline-item--done' : ''}}"><view class="timeline-dot"></view><view><view class="timeline-title">结果确认</view><view class="timeline-copy">亚洲象个体候选需要工作人员复核</view></view></view>
+    </view>
+
+    <button wx:if="{{canOpenResult}}" class="primary-button" bindtap="openResult">查看识别结果</button>
+    <button class="ghost-button history-button" bindtap="goHistory">离开并回首页查看进度</button>
+  </view>
+</view>

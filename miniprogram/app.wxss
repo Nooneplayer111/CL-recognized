@@ -1,0 +1,137 @@
+page {
+  min-height: 100%;
+  background: #ffffff;
+  color: #1d1d1f;
+  font-size: 30rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+view,
+text,
+button,
+image,
+scroll-view {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  border-radius: 24rpx;
+  font-size: 30rpx;
+  font-weight: 650;
+}
+
+button::after {
+  border: none;
+}
+
+.page-shell {
+  min-height: 100vh;
+  padding: 32rpx 32rpx calc(56rpx + env(safe-area-inset-bottom));
+}
+
+.eyebrow {
+  color: #b55f2a;
+  font-size: 24rpx;
+  font-weight: 700;
+  letter-spacing: 3rpx;
+  text-transform: uppercase;
+}
+
+.page-title {
+  margin-top: 12rpx;
+  color: #123a2e;
+  font-size: 52rpx;
+  line-height: 1.16;
+  font-weight: 800;
+}
+
+.page-lead {
+  margin-top: 18rpx;
+  color: #5f6e67;
+  font-size: 29rpx;
+  line-height: 1.7;
+}
+
+.section-title {
+  color: #173c31;
+  font-size: 34rpx;
+  font-weight: 750;
+}
+
+.card {
+  background: #fffdf8;
+  border: 1rpx solid rgba(24, 70, 56, 0.08);
+  border-radius: 32rpx;
+  box-shadow: 0 14rpx 40rpx rgba(34, 61, 51, 0.07);
+}
+
+.primary-button {
+  min-height: 96rpx;
+  padding: 0 32rpx;
+  background: #166b55;
+  color: #ffffff;
+  line-height: 96rpx;
+}
+
+.secondary-button {
+  min-height: 92rpx;
+  padding: 0 32rpx;
+  background: #e7efe9;
+  color: #165943;
+  line-height: 92rpx;
+}
+
+.ghost-button {
+  min-height: 88rpx;
+  padding: 0 28rpx;
+  background: transparent;
+  color: #316152;
+  line-height: 88rpx;
+  border: 2rpx solid #c7d8d0;
+}
+
+.danger-button {
+  min-height: 88rpx;
+  padding: 0 28rpx;
+  background: #fff1ec;
+  color: #9a3d26;
+  line-height: 88rpx;
+}
+
+.text-link {
+  color: #166b55;
+  font-weight: 700;
+}
+
+.muted {
+  color: #77837e;
+}
+
+.divider {
+  height: 1rpx;
+  background: #e6e4dc;
+}
+
+.safe-bottom {
+  height: env(safe-area-inset-bottom);
+}
+
+.inline-error,
+.error-state {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  color: #8f3527;
+  background: #fff0ed;
+  border: 1rpx solid #dda69b;
+  border-radius: 24rpx;
+  font-size: 25rpx;
+  line-height: 1.6;
+}
+
+.inline-error .ghost-button,
+.error-state .primary-button,
+.error-state .ghost-button {
+  width: 100%;
+  margin-top: 18rpx;
+}

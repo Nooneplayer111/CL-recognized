@@ -1,0 +1,69 @@
+.status-card {
+  padding: 34rpx;
+  border-top: 10rpx solid #4f8f7c;
+}
+
+.status-card--success {
+  border-top-color: #16815f;
+}
+
+.status-card--warning {
+  border-top-color: #dc8a3e;
+}
+
+.status-card--danger {
+  border-top-color: #ba513c;
+}
+
+.status-card--neutral {
+  border-top-color: #829088;
+}
+
+.status-card__topline {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.status-card__icon {
+  min-width: 74rpx;
+  min-height: 74rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx;
+  background: #edf4ef;
+  border-radius: 24rpx;
+  font-size: 34rpx;
+}
+
+.status-card__label {
+  color: #52675f;
+  font-size: 25rpx;
+  font-weight: 750;
+}
+
+.status-card__title {
+  margin-top: 28rpx;
+  color: #123a2e;
+  font-size: 44rpx;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.status-card__description {
+  margin-top: 18rpx;
+  color: #5d6c66;
+  font-size: 29rpx;
+  line-height: 1.7;
+}
+
+.status-card__source {
+  margin-top: 24rpx;
+  padding: 18rpx 20rpx;
+  color: #8a5b35;
+  background: #fff3dd;
+  border-radius: 18rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+}

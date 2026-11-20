@@ -1,0 +1,36 @@
+<view class="page-shell deletion-page">
+  <view class="eyebrow">DATA RIGHTS</view>
+  <view class="page-title">删除与隐私申请</view>
+  <view class="page-lead">“从历史删除”和“广义个人信息权利申请”是两条不同流程。本页明确区分，不承诺未接入的在线能力。</view>
+  <view wx:if="{{error}}" class="inline-error" role="alert">{{error}}<button wx:if="{{job}}" class="ghost-button" bindtap="retry">重试查询</button></view>
+
+  <view wx:if="{{job}}" class="job-card card job-card--{{job.state}}" aria-label="删除申请状态{{job.state}}">
+    <view class="job-card__label">删除任务</view>
+    <view class="job-card__state">{{job.state === 'COMPLETED' ? '处理完成' : (job.state === 'PARTIALLY_COMPLETED' ? '部分完成' : (job.state === 'FAILED' ? '处理失败' : '正在处理'))}}</view>
+    <view class="job-card__id">申请编号：{{job.id}}</view>
+    <view class="job-card__copy">{{job.scope === 'PRIVACY_REQUEST' ? '范围：隐私申请。这不会自动删除识别记录。' : '范围：这一条识别历史已从首页移除。'}}</view>
+    <button wx:if="{{job.state === 'COMPLETED'}}" class="secondary-button job-card__button" bindtap="goHistory">回首页查看记录</button>
+  </view>
+
+  <view class="deletion-options">
+    <view class="deletion-card card">
+      <view class="deletion-card__index">01</view>
+      <view class="deletion-card__title">逐条删除识别历史</view>
+      <view class="deletion-card__copy">从当前游客会话的识别历史中删除一条。删除后首页不再显示，管理端审计会留下记录。</view>
+      <view wx:for="{{items}}" wx:key="id" class="history-delete-row">
+        <text>{{item.animalName}} · {{item.statusLabel}}</text>
+        <button class="danger-button" data-id="{{item.id}}" bindtap="deleteOne">删除</button>
+      </view>
+      <view wx:if="{{!items.length}}" class="deletion-card__copy">当前没有可删除的识别记录。</view>
+    </view>
+
+    <view class="deletion-card card">
+      <view class="deletion-card__index">02</view>
+      <view class="deletion-card__title">访问、更正或广义删除申请</view>
+      <view class="deletion-card__copy">提交一条隐私申请。它和删除单条记录是两件事，不会自动清空已有识别结果。</view>
+      <button class="ghost-button deletion-card__button" bindtap="requestPrivacyJob">提交隐私申请</button>
+    </view>
+  </view>
+
+  <view class="deletion-note">正式系统必须冻结身份核验、处理时限、部分完成、法定保留例外、备份影响和申诉渠道。</view>
+</view>
