@@ -1,0 +1,5 @@
+.env
+.venv/
+chat.sqlite
+__pycache__/
+*.pyc
