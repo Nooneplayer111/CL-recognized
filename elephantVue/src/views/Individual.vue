@@ -15,7 +15,7 @@
     </div>
 
     <div class="search-bar">
-      <el-input v-model="searchForm.keyword" placeholder="搜索个体名称或编号" clearable @keyup.enter="handleSearch" @clear="handleSearch">
+      <el-input v-model="searchForm.keyword" placeholder="搜索个体名称" clearable @keyup.enter="handleSearch" @clear="handleSearch">
         <template #append>
           <el-button @click="handleSearch"><el-icon><Search /></el-icon></el-button>
         </template>
@@ -25,7 +25,12 @@
     <el-table v-loading="loading" :data="tableData" border class="individual-table" @row-click="handleRowClick">
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="个体名称" />
-      <el-table-column prop="code" label="个体编号" />
+      <el-table-column label="图片" width="90">
+        <template #default="scope">
+          <img v-if="scope.row.imageUrl" class="table-photo" :src="scope.row.imageUrl" alt="" />
+          <span v-else class="table-photo-empty">无</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="speciesName" label="所属物种" />
       <el-table-column prop="gender" label="性别" width="80">
         <template #default="scope">
@@ -34,14 +39,9 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="age" label="年龄" width="80" />
-      <el-table-column prop="status" label="状态" width="100">
-        <template #default="scope">
-          <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
-            {{ scope.row.status === 'active' ? '活跃' : '非活跃' }}
-          </el-tag>
-        </template>
-      </el-table-column>
+      <el-table-column prop="birthDate" label="出生日期" width="120" />
+      <el-table-column prop="birthPlace" label="出生地" />
+      <el-table-column prop="personality" label="性格" />
       <el-table-column label="操作" width="200">
         <template #default="scope">
           <el-button size="small" @click.stop="editIndividual(scope.row)">编辑</el-button>
@@ -66,10 +66,7 @@
     <el-dialog :title="dialogTitle" v-model="showAddDialog" width="600px" @closed="resetForm">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="个体名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入个体名称" />
-        </el-form-item>
-        <el-form-item label="个体编号" prop="code">
-          <el-input v-model="form.code" placeholder="请输入个体编号" :disabled="!!form.id" />
+          <el-input v-model="form.name" placeholder="请输入个体名称" maxlength="64" />
         </el-form-item>
         <el-form-item label="所属物种" prop="speciesId">
           <el-select v-model="form.speciesId" placeholder="请选择物种">
@@ -82,14 +79,39 @@
             <el-radio label="female">雌性</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="年龄" prop="age">
-          <el-input-number v-model="form.age" :min="0" :max="100" />
+        <el-form-item label="出生日期" prop="birthDate">
+          <el-date-picker v-model="form.birthDate" type="date" value-format="YYYY-MM-DD" placeholder="请选择出生日期" :disabled-date="disableFutureDate" clearable />
+        </el-form-item>
+        <el-form-item label="出生地" prop="birthPlace">
+          <el-input v-model="form.birthPlace" placeholder="请输入出生地" maxlength="128" />
+        </el-form-item>
+        <el-form-item label="性格" prop="personality">
+          <el-input v-model="form.personality" placeholder="请输入性格" maxlength="255" />
+        </el-form-item>
+        <el-form-item label="父亲" prop="father">
+          <el-input v-model="form.father" placeholder="请输入父亲名字" maxlength="64" />
+        </el-form-item>
+        <el-form-item label="母亲" prop="mother">
+          <el-input v-model="form.mother" placeholder="请输入母亲名字" maxlength="64" />
         </el-form-item>
         <el-form-item label="描述" prop="description">
-          <el-input v-model="form.description" type="textarea" placeholder="请输入个体描述" />
+          <el-input v-model="form.description" type="textarea" placeholder="请输入个体描述" maxlength="1000" />
         </el-form-item>
-        <el-form-item label="状态">
-          <el-switch v-model="form.status" :active-value="'active'" :inactive-value="'inactive'" />
+        <el-form-item label="个体图片">
+          <el-upload
+            action="/api/upload"
+            :headers="uploadHeaders"
+            :show-file-list="false"
+            accept="image/*"
+            :on-success="handleUploadSuccess"
+            :on-error="handleUploadError"
+          >
+            <el-button type="primary">上传图片</el-button>
+          </el-upload>
+          <el-button v-if="form.imageUrl" class="remove-image" @click="form.imageUrl = ''">移除图片</el-button>
+          <div v-if="form.imageUrl" class="image-preview">
+            <img :src="form.imageUrl" alt="个体图片预览" />
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -100,13 +122,13 @@
 
     <el-dialog title="个体详情" v-model="showDetailDialog" width="600px">
       <div v-if="detailData" class="detail-content">
+        <div class="detail-photo">
+          <img v-if="detailData.imageUrl" :src="detailData.imageUrl" alt="个体图片" />
+          <span v-else>未上传图片</span>
+        </div>
         <div class="detail-row">
           <span class="detail-label">个体名称</span>
           <span class="detail-value">{{ detailData.name }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">个体编号</span>
-          <span class="detail-value">{{ detailData.code }}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">所属物种</span>
@@ -117,16 +139,24 @@
           <span class="detail-value">{{ detailData.gender === 'male' ? '雄性' : '雌性' }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">年龄</span>
-          <span class="detail-value">{{ detailData.age }}岁</span>
+          <span class="detail-label">出生日期</span>
+          <span class="detail-value">{{ detailData.birthDate || '-' }}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">状态</span>
-          <span class="detail-value">
-            <el-tag :type="detailData.status === 'active' ? 'success' : 'danger'">
-              {{ detailData.status === 'active' ? '活跃' : '非活跃' }}
-            </el-tag>
-          </span>
+          <span class="detail-label">出生地</span>
+          <span class="detail-value">{{ detailData.birthPlace || '-' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">性格</span>
+          <span class="detail-value">{{ detailData.personality || '-' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">父亲</span>
+          <span class="detail-value">{{ detailData.father || '-' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">母亲</span>
+          <span class="detail-value">{{ detailData.mother || '-' }}</span>
         </div>
         <div class="detail-row">
           <span class="detail-label">描述</span>
@@ -142,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search } from '@element-plus/icons-vue'
 import request from '../utils/request'
@@ -171,31 +201,56 @@ const pagination = reactive({
 const form = reactive({
   id: null,
   name: '',
-  code: '',
   speciesId: null,
   gender: 'male',
-  age: 0,
+  birthDate: '',
+  birthPlace: '',
+  personality: '',
+  father: '',
+  mother: '',
   description: '',
-  status: 'active'
+  imageUrl: ''
 })
 
 const rules = {
   name: [{ required: true, message: '请输入个体名称', trigger: 'blur' }],
-  code: [{ required: true, message: '请输入个体编号', trigger: 'blur' }],
-  speciesId: [{ required: true, message: '请选择所属物种', trigger: 'change' }]
+  speciesId: [{ required: true, message: '请选择所属物种', trigger: 'change' }],
+  gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
 }
 
 const detailData = ref(null)
 
+const uploadHeaders = computed(() => ({
+  token: localStorage.getItem('token') || ''
+}))
+
 const buildPayload = () => ({
   name: form.name,
-  code: form.code,
   speciesId: form.speciesId,
   gender: form.gender,
-  age: form.age,
-  description: form.description,
-  status: form.status
+  birthDate: form.birthDate || null,
+  birthPlace: form.birthPlace || null,
+  personality: form.personality || null,
+  father: form.father || null,
+  mother: form.mother || null,
+  description: form.description || null,
+  imageUrl: form.imageUrl || null
 })
+
+const handleUploadSuccess = (response) => {
+  if (response.code === 1 && response.url) {
+    form.imageUrl = response.url
+    ElMessage.success('图片上传成功')
+    return
+  }
+  ElMessage.error(response.message || '图片上传失败')
+}
+
+const handleUploadError = () => {
+  ElMessage.error('图片上传失败，请稍后重试')
+}
+
+const disableFutureDate = (date) => date.getTime() > Date.now()
 
 const loadSpecies = async () => {
   try {
@@ -308,12 +363,15 @@ const submitForm = async () => {
 const resetForm = () => {
   form.id = null
   form.name = ''
-  form.code = ''
   form.speciesId = null
   form.gender = 'male'
-  form.age = 0
+  form.birthDate = ''
+  form.birthPlace = ''
+  form.personality = ''
+  form.father = ''
+  form.mother = ''
   form.description = ''
-  form.status = 'active'
+  form.imageUrl = ''
   formRef.value?.clearValidate()
 }
 
@@ -389,5 +447,47 @@ onMounted(() => {
 .detail-value {
   flex: 1;
   color: #303133;
+}
+
+.table-photo {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.table-photo-empty {
+  color: #909399;
+}
+
+.remove-image {
+  margin-left: 8px;
+}
+
+.image-preview {
+  margin-top: 12px;
+  max-width: 200px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.detail-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  margin-bottom: 8px;
+  background: #f5f7fa;
+  color: #909399;
+}
+
+.detail-photo img {
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
 }
 </style>

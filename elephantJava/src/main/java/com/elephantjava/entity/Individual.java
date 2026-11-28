@@ -1,11 +1,13 @@
 package com.elephantjava.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,9 +20,6 @@ public class Individual {
     @TableField("name")
     private String name;
 
-    @TableField("code")
-    private String code;
-
     @TableField("species_id")
     private Long speciesId;
 
@@ -30,14 +29,26 @@ public class Individual {
     @TableField("gender")
     private String gender;
 
-    @TableField("age")
-    private Integer age;
+    @TableField(value = "birth_date", updateStrategy = FieldStrategy.ALWAYS)
+    private LocalDate birthDate;
 
-    @TableField("description")
+    @TableField(value = "birth_place", updateStrategy = FieldStrategy.ALWAYS)
+    private String birthPlace;
+
+    @TableField(value = "personality", updateStrategy = FieldStrategy.ALWAYS)
+    private String personality;
+
+    @TableField(value = "father", updateStrategy = FieldStrategy.ALWAYS)
+    private String father;
+
+    @TableField(value = "mother", updateStrategy = FieldStrategy.ALWAYS)
+    private String mother;
+
+    @TableField(value = "description", updateStrategy = FieldStrategy.ALWAYS)
     private String description;
 
-    @TableField("status")
-    private String status;
+    @TableField(value = "image_url", updateStrategy = FieldStrategy.ALWAYS)
+    private String imageUrl;
 
     @TableField("create_time")
     private LocalDateTime createTime;

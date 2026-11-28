@@ -18,13 +18,17 @@ public class IndividualVO implements Serializable {
 
     private Long id;
     private String name;
-    private String code;
     private Long speciesId;
     private String speciesName;
     private String gender;
-    private Integer age;
-    private String status;
+    /** 出生日期，格式 yyyy-MM-dd */
+    private String birthDate;
+    private String birthPlace;
+    private String personality;
+    private String father;
+    private String mother;
     private String description;
+    private String imageUrl;
     /** 创建时间，格式 yyyy-MM-dd */
     private String createTime;
 }
