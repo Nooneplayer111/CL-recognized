@@ -9,6 +9,7 @@ import com.elephantjava.entity.Individual;
 import com.elephantjava.entity.MediaUpload;
 import com.elephantjava.entity.RecognitionRecord;
 import com.elephantjava.entity.RecognitionTask;
+import com.elephantjava.entity.Species;
 import com.elephantjava.entity.VisitorSession;
 import com.elephantjava.interceptor.VisitorSessionInterceptor;
 import com.elephantjava.mapper.AuditEventMapper;
@@ -16,24 +17,35 @@ import com.elephantjava.mapper.IndividualMapper;
 import com.elephantjava.mapper.MediaUploadMapper;
 import com.elephantjava.mapper.RecognitionRecordMapper;
 import com.elephantjava.mapper.RecognitionTaskMapper;
+import com.elephantjava.mapper.SpeciesMapper;
 import com.elephantjava.mapper.VisitorSessionMapper;
 import com.elephantjava.properties.RecognitionProperties;
 import com.elephantjava.properties.UploadProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -52,6 +64,7 @@ public class VisitorRecognitionService {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final Set<String> IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
     private static final Set<String> VIDEO_TYPES = Set.of("video/mp4", "video/quicktime");
+    private static final Set<String> UNCONFIRMED_NAMES = Set.of("识别中...", "识别中", "大象", "unknown", "Unknown");
     private static final ObjectMapper JSON = new ObjectMapper();
 
     private final VisitorSessionMapper sessionMapper;
@@ -59,6 +72,7 @@ public class VisitorRecognitionService {
     private final RecognitionTaskMapper taskMapper;
     private final RecognitionRecordMapper recordMapper;
     private final IndividualMapper individualMapper;
+    private final SpeciesMapper speciesMapper;
     private final AuditEventMapper auditMapper;
     private final RecognitionProperties recognitionProperties;
     private final UploadProperties uploadProperties;
@@ -74,6 +88,7 @@ public class VisitorRecognitionService {
                                      RecognitionTaskMapper taskMapper,
                                      RecognitionRecordMapper recordMapper,
                                      IndividualMapper individualMapper,
+                                     SpeciesMapper speciesMapper,
                                      AuditEventMapper auditMapper,
                                      RecognitionProperties recognitionProperties,
                                      UploadProperties uploadProperties) {
@@ -82,6 +97,7 @@ public class VisitorRecognitionService {
         this.taskMapper = taskMapper;
         this.recordMapper = recordMapper;
         this.individualMapper = individualMapper;
+        this.speciesMapper = speciesMapper;
         this.auditMapper = auditMapper;
         this.recognitionProperties = recognitionProperties;
         this.uploadProperties = uploadProperties;
@@ -159,7 +175,7 @@ public class VisitorRecognitionService {
         return uploadView(upload);
     }
 
-    public Map<String, Object> createTask(String mediaAssetId, String idempotencyKey) {
+    public Map<String, Object> createTask(String mediaAssetId, String idempotencyKey, String animalId) {
         String sessionId = requiredSession();
         if (StringUtils.hasText(idempotencyKey)) {
             RecognitionTask existing = taskMapper.selectOne(new LambdaQueryWrapper<RecognitionTask>()
@@ -184,6 +200,7 @@ public class VisitorRecognitionService {
         task.setMediaAssetId(upload.getMediaAssetId());
         task.setIdempotencyKey(StringUtils.hasText(idempotencyKey) ? idempotencyKey : null);
         task.setMediaType(upload.getMediaType());
+        task.setSpeciesId(speciesIdOf(animalId));
         task.setTaskState("QUEUED");
         task.setResultKind("PROCESSING");
         task.setReviewState("NOT_REQUIRED");
@@ -275,7 +292,7 @@ public class VisitorRecognitionService {
 
     public Map<String, Object> publicElephant(String id) {
         Individual individual = individualMapper.selectById(Long.valueOf(id));
-        if (individual == null || !"active".equals(individual.getStatus()) || !isElephant(individual)) {
+        if (individual == null || !isElephant(individual)) {
             throw new BaseException("公开档案暂不可用");
         }
         Map<String, Object> profile = new LinkedHashMap<>();
@@ -284,7 +301,7 @@ public class VisitorRecognitionService {
         profile.put("coverEmoji", "🐘");
         profile.put("heroMark", StringUtils.hasText(individual.getSpeciesName()) ? individual.getSpeciesName() : "亚洲象");
         profile.put("sexLabel", sexLabel(individual.getGender()));
-        profile.put("ageLabel", individual.getAge() == null ? "未公开" : individual.getAge() + "岁");
+        profile.put("ageLabel", ageLabel(individual.getBirthDate()));
         profile.put("story", StringUtils.hasText(individual.getDescription()) ? individual.getDescription() : "这是园区已发布的亚洲象档案。");
         profile.put("traits", List.of("亚洲象", "已发布档案"));
         profile.put("conservation", "请保持安全距离，不使用闪光灯，不越过围栏。");
@@ -390,15 +407,9 @@ public class VisitorRecognitionService {
                     .eq(MediaUpload::getMediaAssetId, task.getMediaAssetId())
                     .last("limit 1"));
             byte[] bytes = Files.readAllBytes(Path.of(upload.getStoragePath()));
-            boolean video = "video".equals(task.getMediaType());
-            String url = video ? recognitionProperties.getPredictVideoUrl() : recognitionProperties.getPredictUrl();
-            String field = video ? "video_base64" : "image_base64";
-            String response = restClient.post()
-                    .uri(url)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(Map.of(field, Base64.getEncoder().encodeToString(bytes)))
-                    .retrieve()
-                    .body(String.class);
+            String response = "video".equals(task.getMediaType())
+                    ? requestVideoRecognition(bytes)
+                    : requestImageRecognition(task.getId(), bytes);
             applyModelResult(task, upload, JSON.readTree(response == null ? "{}" : response));
         } catch (Exception ex) {
             task.setTaskState("FAILED");
@@ -410,6 +421,61 @@ public class VisitorRecognitionService {
             saveRecord(task, null, "failed");
             audit("system", "TASK_FAILED", "recognition_task", task.getId(), task.getErrorMessage());
         }
+    }
+
+    private String requestVideoRecognition(byte[] bytes) {
+        return restClient.post()
+                .uri(recognitionProperties.getPredictVideoUrl())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("video_base64", Base64.getEncoder().encodeToString(bytes)))
+                .retrieve()
+                .body(String.class);
+    }
+
+    private String requestImageRecognition(String sessionId, byte[] bytes) throws Exception {
+        if (!StringUtils.hasText(recognitionProperties.getApiKey())) {
+            throw new BaseException("未配置识别服务 API Key");
+        }
+        byte[] jpeg = jpegBytes(bytes);
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("image", new ByteArrayResource(jpeg) {
+            @Override
+            public String getFilename() {
+                return "frame.jpg";
+            }
+        });
+        parts.add("session_id", sessionId);
+        parts.add("species", "elephant");
+        try {
+            return restClient.post()
+                    .uri(recognitionProperties.getPredictUrl())
+                    .header("X-Api-Key", recognitionProperties.getApiKey())
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(parts)
+                    .retrieve()
+                    .body(String.class);
+        } catch (RestClientResponseException ex) {
+            throw new BaseException("识别服务返回 " + ex.getStatusCode().value() + "："
+                    + limit(ex.getResponseBodyAsString(), 300, "无详情"));
+        }
+    }
+
+    private static byte[] jpegBytes(byte[] bytes) throws Exception {
+        if (bytes.length >= 3
+                && (bytes[0] & 0xFF) == 0xFF
+                && (bytes[1] & 0xFF) == 0xD8
+                && (bytes[2] & 0xFF) == 0xFF) {
+            return bytes;
+        }
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(bytes));
+        if (image == null) {
+            throw new BaseException("照片需要是 JPEG、PNG 或 WebP");
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        if (!ImageIO.write(image, "jpg", out)) {
+            throw new BaseException("照片无法转成 JPEG");
+        }
+        return out.toByteArray();
     }
 
     private void applyModelResult(RecognitionTask task, MediaUpload upload, JsonNode root) {
@@ -432,11 +498,51 @@ public class VisitorRecognitionService {
             judgeSingle(task, upload, text(only.path("name").asText(null)), confidenceOf(only.get("confidence")));
             return;
         }
+        if (root.path("tracks").isArray()) {
+            applyTracks(task, upload, root.path("tracks"));
+            return;
+        }
         String name = text(root.path("elephant_name").asText(null));
         if (!StringUtils.hasText(name)) {
             name = text(root.path("name").asText(null));
         }
         judgeSingle(task, upload, name, confidenceOf(root.get("confidence")));
+    }
+
+    private void applyTracks(RecognitionTask task, MediaUpload upload, JsonNode tracks) {
+        Map<String, BigDecimal> confirmed = new LinkedHashMap<>();
+        boolean pending = false;
+        for (JsonNode track : tracks) {
+            String name = text(track.path("name").asText(null));
+            if (!StringUtils.hasText(name)) {
+                name = text(track.path("elephant_name").asText(null));
+            }
+            if (!StringUtils.hasText(name) || UNCONFIRMED_NAMES.contains(name)) {
+                pending = pending || StringUtils.hasText(name);
+                continue;
+            }
+            confirmed.putIfAbsent(name, trackConfidence(track));
+        }
+        if (confirmed.isEmpty()) {
+            finish(task, upload, pending ? "UNKNOWN" : "NO_ELEPHANT", "NOT_REQUIRED", null, null);
+            return;
+        }
+        Map.Entry<String, BigDecimal> first = confirmed.entrySet().iterator().next();
+        if (confirmed.size() > 1) {
+            finish(task, upload, "MULTIPLE", "NOT_REQUIRED", first.getKey(), first.getValue());
+            return;
+        }
+        judgeSingle(task, upload, first.getKey(), first.getValue());
+    }
+
+    private static BigDecimal trackConfidence(JsonNode track) {
+        for (String field : List.of("confidence", "score", "prob")) {
+            BigDecimal value = confidenceOf(track.get(field));
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private void judgeSingle(RecognitionTask task, MediaUpload upload, String name, BigDecimal confidence) {
@@ -446,14 +552,17 @@ public class VisitorRecognitionService {
             finish(task, upload, "UNKNOWN", "NOT_REQUIRED", null, confidence);
             return;
         }
-        Individual matched = individualMapper.selectOne(new LambdaQueryWrapper<Individual>()
-                .eq(Individual::getName, name)
-                .eq(Individual::getStatus, "active")
-                .last("limit 1"));
+        Individual matched = null;
+        if (task.getSpeciesId() != null) {
+            matched = individualMapper.selectOne(new LambdaQueryWrapper<Individual>()
+                    .eq(Individual::getName, name)
+                    .eq(Individual::getSpeciesId, task.getSpeciesId())
+                    .last("limit 1"));
+        }
         if (matched != null) {
             task.setIndividualId(matched.getId());
         }
-        if (confidence != null && confidence.compareTo(recognitionProperties.getKnownThreshold()) >= 0) {
+        if (confidence == null || confidence.compareTo(recognitionProperties.getKnownThreshold()) >= 0) {
             finish(task, upload, "KNOWN", "NOT_REQUIRED", name, confidence);
             return;
         }
@@ -515,6 +624,43 @@ public class VisitorRecognitionService {
         }
     }
 
+    private Long speciesIdOf(String animalId) {
+        String speciesName = MiniProgramAnimals.speciesName(animalId);
+        if (!StringUtils.hasText(speciesName)) {
+            return null;
+        }
+        Species species = speciesMapper.selectOne(new LambdaQueryWrapper<Species>()
+                .eq(Species::getName, speciesName)
+                .last("limit 1"));
+        return species == null ? null : species.getId();
+    }
+
+    private Map<String, Object> individualProfile(String kind, Long individualId) {
+        if (individualId == null || Set.of("MULTIPLE", "NO_ELEPHANT", "FAILED", "TIMED_OUT", "PROCESSING").contains(kind)) {
+            return null;
+        }
+        Individual individual = individualMapper.selectById(individualId);
+        if (individual == null) {
+            return null;
+        }
+        Map<String, Object> profile = new LinkedHashMap<>();
+        profile.put("id", String.valueOf(individual.getId()));
+        profile.put("name", filled(individual.getName()));
+        profile.put("genderLabel", StringUtils.hasText(individual.getGender()) ? sexLabel(individual.getGender()) : "未填写");
+        profile.put("birthDate", individual.getBirthDate() == null ? "未填写" : individual.getBirthDate().toString());
+        profile.put("birthPlace", filled(individual.getBirthPlace()));
+        profile.put("personality", filled(individual.getPersonality()));
+        profile.put("father", filled(individual.getFather()));
+        profile.put("mother", filled(individual.getMother()));
+        profile.put("description", filled(individual.getDescription()));
+        profile.put("imageUrl", StringUtils.hasText(individual.getImageUrl()) ? individual.getImageUrl() : null);
+        return profile;
+    }
+
+    private static String filled(String value) {
+        return StringUtils.hasText(value) ? value.trim() : "未填写";
+    }
+
     private Map<String, Object> taskView(RecognitionTask task) {
         String kind = task.getResultKind() == null ? "PROCESSING" : task.getResultKind();
         boolean terminal = Set.of("COMPLETED", "FAILED").contains(task.getTaskState())
@@ -536,6 +682,7 @@ public class VisitorRecognitionService {
         view.put("animalIcon", "🐘");
         view.put("updatedAtLabel", task.getUpdatedAt() == null ? "" : TIME.format(task.getUpdatedAt()));
         view.put("publicProfileRef", "KNOWN".equals(kind) && task.getIndividualId() != null ? String.valueOf(task.getIndividualId()) : null);
+        view.put("individual", individualProfile(kind, task.getIndividualId()));
         view.put("supportsFeedback", !Set.of("FAILED", "TIMED_OUT", "PROCESSING").contains(kind));
         view.put("targets", targets(task));
         view.put("qualityReasons", StringUtils.hasText(task.getQualityReason()) ? List.of(task.getQualityReason()) : List.of());
@@ -632,11 +779,17 @@ public class VisitorRecognitionService {
 
     private List<Individual> activeElephants() {
         return individualMapper.selectList(new LambdaQueryWrapper<Individual>()
-                .eq(Individual::getStatus, "active")
                 .orderByAsc(Individual::getName))
                 .stream()
                 .filter(this::isElephant)
                 .toList();
+    }
+
+    private static String ageLabel(LocalDate birthDate) {
+        if (birthDate == null || birthDate.isAfter(LocalDate.now())) {
+            return "未公开";
+        }
+        return Period.between(birthDate, LocalDate.now()).getYears() + "岁";
     }
 
     private boolean isElephant(Individual individual) {

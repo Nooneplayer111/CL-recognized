@@ -47,7 +47,18 @@ public class VisitorRecognitionController {
     @PostMapping("/recognition-tasks")
     public Result<Map<String, Object>> createTask(@RequestBody Map<String, Object> request,
                                                    @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
-        return Result.success(recognitionService.createTask(String.valueOf(request.get("mediaAssetId")), idempotencyKey));
+        return Result.success(recognitionService.createTask(
+                String.valueOf(request.get("mediaAssetId")),
+                idempotencyKey,
+                textOrNull(request.get("animalId"))));
+    }
+
+    private static String textOrNull(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value).trim();
+        return text.isEmpty() || "null".equals(text) ? null : text;
     }
 
     @GetMapping("/recognition-tasks/{id}")

@@ -35,17 +35,19 @@ CREATE TABLE IF NOT EXISTS `species` (
 CREATE TABLE IF NOT EXISTS `individual` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(64) NOT NULL,
-  `code` VARCHAR(64) NOT NULL,
   `species_id` BIGINT NULL,
   `species_name` VARCHAR(64) NULL,
-  `gender` VARCHAR(32) NULL,
-  `age` INT NULL,
+  `gender` VARCHAR(16) NOT NULL,
+  `birth_date` DATE NULL,
+  `birth_place` VARCHAR(128) NULL,
+  `personality` VARCHAR(255) NULL,
+  `father` VARCHAR(64) NULL,
+  `mother` VARCHAR(64) NULL,
   `description` VARCHAR(1000) NULL,
-  `status` VARCHAR(32) NULL,
+  `image_url` VARCHAR(500) NULL,
   `create_time` DATETIME NULL,
   `update_time` DATETIME NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_individual_code` (`code`),
   KEY `idx_individual_species` (`species_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -128,6 +130,7 @@ CREATE TABLE IF NOT EXISTS `recognition_task` (
   `review_state` VARCHAR(32) NOT NULL,
   `predicted_name` VARCHAR(128) NULL,
   `confidence` DECIMAL(6,2) NULL,
+  `species_id` BIGINT NULL,
   `individual_id` BIGINT NULL,
   `record_id` BIGINT NULL,
   `quality_reason` VARCHAR(255) NULL,

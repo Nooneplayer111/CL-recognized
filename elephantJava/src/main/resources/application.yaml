@@ -30,8 +30,9 @@ elephant:
     path: uploads
     access-path: /uploads
   recognition:
-    predict-url: https://recognize.liangzhihuamei.xyz/predict
+    predict-url: http://120.196.88.140:9998/api/v1/infer
     predict-video-url: https://recognize.liangzhihuamei.xyz/predict-video
+    api-key: elephant-demo-2026
     public-base-url: http://localhost:8082
     known-threshold: 75
     review-threshold: 45

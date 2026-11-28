@@ -1,6 +1,7 @@
 # 二次开发交接包（本地参考，不纳入版本库）
 大象小程序-二次开发交接-20261110/
 大象小程序-二次开发交接-20261110.zip
+uploads/
 
 agent_service/.env
 agent_service/.venv/

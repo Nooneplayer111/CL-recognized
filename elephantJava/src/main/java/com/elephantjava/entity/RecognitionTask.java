@@ -33,6 +33,8 @@ public class RecognitionTask {
 
     private BigDecimal confidence;
 
+    private Long speciesId;
+
     private Long individualId;
 
     private Long recordId;

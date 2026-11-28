@@ -52,6 +52,7 @@ public class VisitorChainSchema implements ApplicationRunner {
                   review_state VARCHAR(32) NOT NULL,
                   predicted_name VARCHAR(128),
                   confidence DECIMAL(6,2),
+                  species_id BIGINT,
                   individual_id BIGINT,
                   record_id BIGINT,
                   quality_reason VARCHAR(255),
@@ -73,5 +74,17 @@ public class VisitorChainSchema implements ApplicationRunner {
                   detail VARCHAR(500),
                   created_at DATETIME NOT NULL
                 )""");
+        addColumnIfMissing("individual", "image_url", "VARCHAR(500) NULL");
+        addColumnIfMissing("recognition_task", "species_id", "BIGINT NULL");
+    }
+
+    private void addColumnIfMissing(String table, String column, String definition) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+                """, Integer.class, table, column);
+        if (count == null || count == 0) {
+            jdbcTemplate.execute("ALTER TABLE `" + table + "` ADD COLUMN `" + column + "` " + definition);
+        }
     }
 }
